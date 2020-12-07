@@ -1,0 +1,124 @@
+package fr.utbm.ia54.acotsp
+
+/** 
+ * 
+ */
+import io.sarl.core.AgentKilled
+import io.sarl.core.AgentSpawned
+import io.sarl.core.ContextJoined
+import io.sarl.core.ContextLeft
+import io.sarl.core.Destroy
+import io.sarl.core.Initialize
+import io.sarl.core.Logging
+import io.sarl.core.MemberJoined
+import io.sarl.core.MemberLeft
+import io.sarl.core.ParticipantJoined
+import io.sarl.core.ParticipantLeft
+import io.sarl.core.SpaceCreated
+import io.sarl.core.SpaceDestroyed
+import java.util.UUID
+import java.util.ArrayList
+import java.util.List
+
+/** 
+ * @author Omen
+ * 
+ */
+@SuppressWarnings("potential_field_synchronization_problem")
+agent ACOAgent {
+	uses Logging
+
+	var environment : UUID
+
+	var numberOfCities : Integer
+
+	var startingCity : Integer
+
+	var distances : Integer[][]
+
+	var attachedCluster : Integer[]
+
+	var pheromones : Double[][]
+
+	var pheromoneRegulationFactor : Float
+
+	var visibilityRegulationFactor : Float
+
+	var currentCity : Integer
+
+	var currentPathLength : Integer
+
+	var visitedCities : ArrayList<Integer>
+
+	var visitedClusters : Integer[]
+
+	on Initialize {
+		if (occurrence.parameters.size > 7) {
+			if (occurrence.parameters.get(0) instanceof UUID) {
+				environment = occurrence.parameters.get(0) as UUID
+			}
+
+			if (occurrence.parameters.get(1) instanceof Integer) {
+				startingCity = occurrence.parameters.get(1) as Integer
+			}
+
+			if (occurrence.parameters.get(2) instanceof Integer[][]) {
+				distances = occurrence.parameters.get(2) as Integer[][]
+			}
+			if (occurrence.parameters.get(3) instanceof Float) {
+				pheromoneRegulationFactor = occurrence.parameters.get(3) as Float
+			}
+			if (occurrence.parameters.get(4) instanceof Float) {
+				visibilityRegulationFactor = occurrence.parameters.get(4) as Float
+			}
+			if (occurrence.parameters.get(5) instanceof Integer) {
+				numberOfCities = occurrence.parameters.get(5) as Integer
+			}
+			if (occurrence.parameters.get(6) instanceof Integer[]) {
+				attachedCluster = occurrence.parameters.get(6) as Integer[]
+			}
+			if (occurrence.parameters.get(7) instanceof String) {
+				loggingName = occurrence.parameters.get(7) as String
+			}
+		}
+		info("The agent was started.")
+	}
+
+	on NewIteration {
+		this.pheromones = occurrence.pheromones
+	}
+
+	def contstructPath() : void {
+		visitedCities = new ArrayList<Integer>
+		this.currentCity = startingCity
+		visitedCities.add(startingCity)
+		while (visitedCities.size() < numberOfCities) {
+			var probabilites = new ArrayList<Float>
+			probabilitiesComputation(currentCity, probabilites)
+		}
+	}
+
+	def probabilitiesComputation(currentCity : Integer, probabilites : ArrayList<Float>) {
+		var sum = 0d
+	
+		for (var i = 0; i < numberOfCities; i++) {
+			if (!visitedCities.contains(i))
+				sum +=
+					Math.pow(pheromones.get(currentCity).get(i) as double, pheromoneRegulationFactor) *
+						Math.pow(1 / distances.get(currentCity).get(i) as double, visibilityRegulationFactor)
+		}
+		for (var i = 0; i < numberOfCities; i++) {
+			var probability = Math.pow(pheromones.get(currentCity).get(i) as double, pheromoneRegulationFactor) *
+				Math.pow(1 / distances.get(currentCity).get(i) as double, visibilityRegulationFactor)/sum
+			probabilites.add(probability.toFloat)
+		}
+	
+	}
+
+	on Destroy {
+		// Event trigger when the agent is destroyed from the system.
+		// You should put all the resource releasing statements in this block of code.
+		info("The agent was stopped.")
+	}
+
+}

@@ -1,0 +1,74 @@
+/** 
+ * 
+ */
+package fr.utbm.ia54.acotsp
+
+import org.eclipse.xtend.lib.annotations.Accessors
+
+/** 
+ * @author yaben
+ * 
+ */
+ 
+ 
+event NewIteration {
+	var pheromones : Double[][]
+
+	new(p : Double[][]) {
+		pheromones = p
+	}
+} 
+
+class ACOSharedData {
+
+	// Nombre de villes
+	@Accessors
+	var numberOfCities : Integer
+	
+	// Matrice des distances entre les villes
+	@Accessors
+	var distances : Integer[][]
+
+	// Matrice des positions des villes
+	@Accessors
+	var positions : Float[][]
+
+	// Liste de l'appartenance des villes aux clusters
+	@Accessors
+	var attachedCluster : Integer[]
+
+	// Facteur d'évaporation des phéromones
+	@Accessors
+	var pheromoneEvaporationFactor : Float
+
+	// Facteur de régulation de l'influence du taux de phéromones
+	@Accessors
+	var pheromoneRegulationFactor : Float
+
+	// Facteur de régulation de l'influence de la proximité entre les villes
+	@Accessors
+	var visibilityRegulationFactor : Float
+
+	// Nombre de fourmis
+	@Accessors
+	var nunberOfAnts : Integer
+
+	// Nombre d'itérations réalisées lors d'une optimisation
+	@Accessors
+	var numberOfIterations : Integer
+
+	new (idistances : Integer[][], ipositions : Float[][], iattachedCluster : Integer[],
+		ipheromoneEvaporationFactor : Float, ipheromoneRegulationFactor : Float, ivisibilityRegulationFactor : Float,
+		inunberOfAnts : Integer, inumberOfIterations : Integer, inumberOfCities : Integer) {
+		numberOfCities = inumberOfCities
+		distances = idistances
+		positions = ipositions
+		attachedCluster = iattachedCluster
+		pheromoneEvaporationFactor = ipheromoneEvaporationFactor
+		pheromoneRegulationFactor = ipheromoneRegulationFactor
+		visibilityRegulationFactor = ivisibilityRegulationFactor
+		nunberOfAnts = inunberOfAnts
+		numberOfIterations = inumberOfIterations
+	}
+
+}
