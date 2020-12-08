@@ -15,6 +15,9 @@ public class ACOSharedData {
   private Integer numberOfCities;
   
   @Accessors
+  private Integer numberOfClusters;
+  
+  @Accessors
   private Integer[][] distances;
   
   @Accessors
@@ -38,8 +41,9 @@ public class ACOSharedData {
   @Accessors
   private Integer numberOfIterations;
   
-  public ACOSharedData(final Integer[][] idistances, final Float[][] ipositions, final Integer[] iattachedCluster, final Float ipheromoneEvaporationFactor, final Float ipheromoneRegulationFactor, final Float ivisibilityRegulationFactor, final Integer inunberOfAnts, final Integer inumberOfIterations, final Integer inumberOfCities) {
+  public ACOSharedData(final Integer[][] idistances, final Float[][] ipositions, final Integer[] iattachedCluster, final Float ipheromoneEvaporationFactor, final Float ipheromoneRegulationFactor, final Float ivisibilityRegulationFactor, final Integer inunberOfAnts, final Integer inumberOfIterations, final Integer inumberOfCities, final Integer inumberOfClusters) {
     this.numberOfCities = inumberOfCities;
+    this.numberOfClusters = inumberOfClusters;
     this.distances = idistances;
     this.positions = ipositions;
     this.attachedCluster = iattachedCluster;
@@ -67,6 +71,13 @@ public class ACOSharedData {
     } else if (this.numberOfCities == null)
       return false;
     if (other.numberOfCities != null && other.numberOfCities.intValue() != this.numberOfCities.intValue())
+      return false;
+    if (other.numberOfClusters == null) {
+      if (this.numberOfClusters != null)
+        return false;
+    } else if (this.numberOfClusters == null)
+      return false;
+    if (other.numberOfClusters != null && other.numberOfClusters.intValue() != this.numberOfClusters.intValue())
       return false;
     if (other.pheromoneEvaporationFactor == null) {
       if (this.pheromoneEvaporationFactor != null)
@@ -110,6 +121,7 @@ public class ACOSharedData {
     int result = super.hashCode();
     final int prime = 31;
     result = prime * result + Objects.hashCode(this.numberOfCities);
+    result = prime * result + Objects.hashCode(this.numberOfClusters);
     result = prime * result + Objects.hashCode(this.pheromoneEvaporationFactor);
     result = prime * result + Objects.hashCode(this.pheromoneRegulationFactor);
     result = prime * result + Objects.hashCode(this.visibilityRegulationFactor);
@@ -125,6 +137,15 @@ public class ACOSharedData {
   
   public void setNumberOfCities(final Integer numberOfCities) {
     this.numberOfCities = numberOfCities;
+  }
+  
+  @Pure
+  public Integer getNumberOfClusters() {
+    return this.numberOfClusters;
+  }
+  
+  public void setNumberOfClusters(final Integer numberOfClusters) {
+    this.numberOfClusters = numberOfClusters;
   }
   
   @Pure

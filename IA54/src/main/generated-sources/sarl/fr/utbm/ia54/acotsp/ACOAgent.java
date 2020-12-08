@@ -1,9 +1,15 @@
 package fr.utbm.ia54.acotsp;
 
 import fr.utbm.ia54.acotsp.NewIteration;
+import fr.utbm.ia54.acotsp.ProbabilitiesComputation;
+import fr.utbm.ia54.acotsp.ProbabilitiesComputationWithGroupInfluenceSkill;
+import io.sarl.core.DefaultContextInteractions;
 import io.sarl.core.Destroy;
 import io.sarl.core.Initialize;
+import io.sarl.core.InnerContextAccess;
+import io.sarl.core.Lifecycle;
 import io.sarl.core.Logging;
+import io.sarl.core.Schedules;
 import io.sarl.lang.annotation.ImportedCapacityFeature;
 import io.sarl.lang.annotation.PerceptGuardEvaluator;
 import io.sarl.lang.annotation.SarlElementType;
@@ -21,6 +27,7 @@ import java.util.UUID;
 import javax.inject.Inject;
 import org.eclipse.xtext.xbase.lib.Conversions;
 import org.eclipse.xtext.xbase.lib.Extension;
+import org.eclipse.xtext.xbase.lib.IterableExtensions;
 import org.eclipse.xtext.xbase.lib.Pure;
 
 /**
@@ -33,6 +40,8 @@ public class ACOAgent extends Agent {
   private UUID environment;
   
   private Integer numberOfCities;
+  
+  private Integer numberOfClusters;
   
   private Integer startingCity;
   
@@ -52,11 +61,11 @@ public class ACOAgent extends Agent {
   
   private ArrayList<Integer> visitedCities;
   
-  private Integer[] visitedClusters;
+  private ArrayList<Integer> visitedClusters;
   
   private void $behaviorUnit$Initialize$0(final Initialize occurrence) {
     int _size = ((List<Object>)Conversions.doWrapArray(occurrence.parameters)).size();
-    if ((_size > 7)) {
+    if ((_size > 8)) {
       Object _get = occurrence.parameters[0];
       if ((_get instanceof UUID)) {
         Object _get_1 = occurrence.parameters[0];
@@ -88,17 +97,25 @@ public class ACOAgent extends Agent {
         this.numberOfCities = ((Integer) _get_11);
       }
       Object _get_12 = occurrence.parameters[6];
-      if ((_get_12 instanceof Integer[])) {
+      if ((_get_12 instanceof Integer)) {
         Object _get_13 = occurrence.parameters[6];
-        this.attachedCluster = ((Integer[]) _get_13);
+        this.numberOfClusters = ((Integer) _get_13);
       }
       Object _get_14 = occurrence.parameters[7];
-      if ((_get_14 instanceof String)) {
-        Logging _$CAPACITY_USE$IO_SARL_CORE_LOGGING$CALLER = this.$CAPACITY_USE$IO_SARL_CORE_LOGGING$CALLER();
+      if ((_get_14 instanceof Integer[])) {
         Object _get_15 = occurrence.parameters[7];
-        _$CAPACITY_USE$IO_SARL_CORE_LOGGING$CALLER.setLoggingName((_get_15 == null ? null : _get_15.toString()));
+        this.attachedCluster = ((Integer[]) _get_15);
+      }
+      Object _get_16 = occurrence.parameters[8];
+      if ((_get_16 instanceof String)) {
+        Logging _$CAPACITY_USE$IO_SARL_CORE_LOGGING$CALLER = this.$CAPACITY_USE$IO_SARL_CORE_LOGGING$CALLER();
+        Object _get_17 = occurrence.parameters[8];
+        _$CAPACITY_USE$IO_SARL_CORE_LOGGING$CALLER.setLoggingName((_get_17 == null ? null : _get_17.toString()));
       }
     }
+    ProbabilitiesComputationWithGroupInfluenceSkill _probabilitiesComputationWithGroupInfluenceSkill = new ProbabilitiesComputationWithGroupInfluenceSkill(this.numberOfCities, this.distances, this.attachedCluster, 
+      this.pheromoneRegulationFactor, this.visibilityRegulationFactor);
+    this.<ProbabilitiesComputationWithGroupInfluenceSkill>setSkill(_probabilitiesComputationWithGroupInfluenceSkill, ProbabilitiesComputation.class);
     Logging _$CAPACITY_USE$IO_SARL_CORE_LOGGING$CALLER_1 = this.$CAPACITY_USE$IO_SARL_CORE_LOGGING$CALLER();
     _$CAPACITY_USE$IO_SARL_CORE_LOGGING$CALLER_1.info("The agent was started.");
   }
@@ -112,35 +129,16 @@ public class ACOAgent extends Agent {
     this.visitedCities = _arrayList;
     this.currentCity = this.startingCity;
     this.visitedCities.add(this.startingCity);
-    while ((this.visitedCities.size() < this.numberOfCities.doubleValue())) {
+    this.visitedClusters.add(this.attachedCluster[((this.startingCity) == null ? 0 : (this.startingCity).intValue())]);
+    while ((this.visitedClusters.size() < this.numberOfClusters.doubleValue())) {
       {
-        ArrayList<Float> probabilites = new ArrayList<Float>();
-        this.probabilitiesComputation(this.currentCity, probabilites);
-      }
-    }
-  }
-  
-  protected void probabilitiesComputation(final Integer currentCity, final ArrayList<Float> probabilites) {
-    double sum = 0d;
-    for (int i = 0; (i < this.numberOfCities.doubleValue()); i++) {
-      boolean _contains = this.visitedCities.contains(Integer.valueOf(i));
-      if ((!_contains)) {
-        Double _get = this.pheromones[((currentCity) == null ? 0 : (currentCity).intValue())][i];
-        double _pow = Math.pow(((_get) == null ? 0 : (double) _get) , ((this.pheromoneRegulationFactor) == null ? 0 : (this.pheromoneRegulationFactor).floatValue()));
-        Integer _get_1 = this.distances[((currentCity) == null ? 0 : (currentCity).intValue())][i];
-        double _pow_1 = Math.pow((1 / ((_get_1) == null ? 0 : (int) _get_1) ), ((this.visibilityRegulationFactor) == null ? 0 : (this.visibilityRegulationFactor).floatValue()));
-        sum = (sum + 
-          (_pow * _pow_1));
-      }
-    }
-    for (int i = 0; (i < this.numberOfCities.doubleValue()); i++) {
-      {
-        Double _get = this.pheromones[((currentCity) == null ? 0 : (currentCity).intValue())][i];
-        double _pow = Math.pow(((_get) == null ? 0 : (double) _get) , ((this.pheromoneRegulationFactor) == null ? 0 : (this.pheromoneRegulationFactor).floatValue()));
-        Integer _get_1 = this.distances[((currentCity) == null ? 0 : (currentCity).intValue())][i];
-        double _pow_1 = Math.pow((1 / ((_get_1) == null ? 0 : (int) _get_1) ), ((this.visibilityRegulationFactor) == null ? 0 : (this.visibilityRegulationFactor).floatValue()));
-        double probability = ((_pow * _pow_1) / sum);
-        probabilites.add(Float.valueOf((float) probability));
+        ArrayList<Float> probabilities = new ArrayList<Float>();
+        ProbabilitiesComputation _$CAPACITY_USE$FR_UTBM_IA54_ACOTSP_PROBABILITIESCOMPUTATION$CALLER = this.$CAPACITY_USE$FR_UTBM_IA54_ACOTSP_PROBABILITIESCOMPUTATION$CALLER();
+        probabilities = _$CAPACITY_USE$FR_UTBM_IA54_ACOTSP_PROBABILITIESCOMPUTATION$CALLER.probabilitiesComputation(this.currentCity, probabilities, this.visitedCities, this.visitedClusters, 
+          this.pheromones);
+        int nextVisitedCity = probabilities.indexOf(IterableExtensions.<Float>max(probabilities));
+        this.visitedCities.add(Integer.valueOf(nextVisitedCity));
+        this.visitedClusters.add(this.attachedCluster[nextVisitedCity]);
       }
     }
   }
@@ -162,6 +160,76 @@ public class ACOAgent extends Agent {
       this.$CAPACITY_USE$IO_SARL_CORE_LOGGING = $getSkill(Logging.class);
     }
     return $castSkill(Logging.class, this.$CAPACITY_USE$IO_SARL_CORE_LOGGING);
+  }
+  
+  @Extension
+  @ImportedCapacityFeature(InnerContextAccess.class)
+  @SyntheticMember
+  private transient AtomicSkillReference $CAPACITY_USE$IO_SARL_CORE_INNERCONTEXTACCESS;
+  
+  @SyntheticMember
+  @Pure
+  private InnerContextAccess $CAPACITY_USE$IO_SARL_CORE_INNERCONTEXTACCESS$CALLER() {
+    if (this.$CAPACITY_USE$IO_SARL_CORE_INNERCONTEXTACCESS == null || this.$CAPACITY_USE$IO_SARL_CORE_INNERCONTEXTACCESS.get() == null) {
+      this.$CAPACITY_USE$IO_SARL_CORE_INNERCONTEXTACCESS = $getSkill(InnerContextAccess.class);
+    }
+    return $castSkill(InnerContextAccess.class, this.$CAPACITY_USE$IO_SARL_CORE_INNERCONTEXTACCESS);
+  }
+  
+  @Extension
+  @ImportedCapacityFeature(DefaultContextInteractions.class)
+  @SyntheticMember
+  private transient AtomicSkillReference $CAPACITY_USE$IO_SARL_CORE_DEFAULTCONTEXTINTERACTIONS;
+  
+  @SyntheticMember
+  @Pure
+  private DefaultContextInteractions $CAPACITY_USE$IO_SARL_CORE_DEFAULTCONTEXTINTERACTIONS$CALLER() {
+    if (this.$CAPACITY_USE$IO_SARL_CORE_DEFAULTCONTEXTINTERACTIONS == null || this.$CAPACITY_USE$IO_SARL_CORE_DEFAULTCONTEXTINTERACTIONS.get() == null) {
+      this.$CAPACITY_USE$IO_SARL_CORE_DEFAULTCONTEXTINTERACTIONS = $getSkill(DefaultContextInteractions.class);
+    }
+    return $castSkill(DefaultContextInteractions.class, this.$CAPACITY_USE$IO_SARL_CORE_DEFAULTCONTEXTINTERACTIONS);
+  }
+  
+  @Extension
+  @ImportedCapacityFeature(Lifecycle.class)
+  @SyntheticMember
+  private transient AtomicSkillReference $CAPACITY_USE$IO_SARL_CORE_LIFECYCLE;
+  
+  @SyntheticMember
+  @Pure
+  private Lifecycle $CAPACITY_USE$IO_SARL_CORE_LIFECYCLE$CALLER() {
+    if (this.$CAPACITY_USE$IO_SARL_CORE_LIFECYCLE == null || this.$CAPACITY_USE$IO_SARL_CORE_LIFECYCLE.get() == null) {
+      this.$CAPACITY_USE$IO_SARL_CORE_LIFECYCLE = $getSkill(Lifecycle.class);
+    }
+    return $castSkill(Lifecycle.class, this.$CAPACITY_USE$IO_SARL_CORE_LIFECYCLE);
+  }
+  
+  @Extension
+  @ImportedCapacityFeature(Schedules.class)
+  @SyntheticMember
+  private transient AtomicSkillReference $CAPACITY_USE$IO_SARL_CORE_SCHEDULES;
+  
+  @SyntheticMember
+  @Pure
+  private Schedules $CAPACITY_USE$IO_SARL_CORE_SCHEDULES$CALLER() {
+    if (this.$CAPACITY_USE$IO_SARL_CORE_SCHEDULES == null || this.$CAPACITY_USE$IO_SARL_CORE_SCHEDULES.get() == null) {
+      this.$CAPACITY_USE$IO_SARL_CORE_SCHEDULES = $getSkill(Schedules.class);
+    }
+    return $castSkill(Schedules.class, this.$CAPACITY_USE$IO_SARL_CORE_SCHEDULES);
+  }
+  
+  @Extension
+  @ImportedCapacityFeature(ProbabilitiesComputation.class)
+  @SyntheticMember
+  private transient AtomicSkillReference $CAPACITY_USE$FR_UTBM_IA54_ACOTSP_PROBABILITIESCOMPUTATION;
+  
+  @SyntheticMember
+  @Pure
+  private ProbabilitiesComputation $CAPACITY_USE$FR_UTBM_IA54_ACOTSP_PROBABILITIESCOMPUTATION$CALLER() {
+    if (this.$CAPACITY_USE$FR_UTBM_IA54_ACOTSP_PROBABILITIESCOMPUTATION == null || this.$CAPACITY_USE$FR_UTBM_IA54_ACOTSP_PROBABILITIESCOMPUTATION.get() == null) {
+      this.$CAPACITY_USE$FR_UTBM_IA54_ACOTSP_PROBABILITIESCOMPUTATION = $getSkill(ProbabilitiesComputation.class);
+    }
+    return $castSkill(ProbabilitiesComputation.class, this.$CAPACITY_USE$FR_UTBM_IA54_ACOTSP_PROBABILITIESCOMPUTATION);
   }
   
   @SyntheticMember
@@ -208,6 +276,13 @@ public class ACOAgent extends Agent {
       return false;
     if (other.numberOfCities != null && other.numberOfCities.intValue() != this.numberOfCities.intValue())
       return false;
+    if (other.numberOfClusters == null) {
+      if (this.numberOfClusters != null)
+        return false;
+    } else if (this.numberOfClusters == null)
+      return false;
+    if (other.numberOfClusters != null && other.numberOfClusters.intValue() != this.numberOfClusters.intValue())
+      return false;
     if (other.startingCity == null) {
       if (this.startingCity != null)
         return false;
@@ -252,6 +327,7 @@ public class ACOAgent extends Agent {
     final int prime = 31;
     result = prime * result + Objects.hashCode(this.environment);
     result = prime * result + Objects.hashCode(this.numberOfCities);
+    result = prime * result + Objects.hashCode(this.numberOfClusters);
     result = prime * result + Objects.hashCode(this.startingCity);
     result = prime * result + Objects.hashCode(this.pheromoneRegulationFactor);
     result = prime * result + Objects.hashCode(this.visibilityRegulationFactor);

@@ -44,7 +44,4 @@ public class NewIteration extends Event {
     super.toString(builder);
     builder.add("pheromones", this.pheromones);
   }
-  
-  @SyntheticMember
-  private static final long serialVersionUID = 4033564245L;
 }

@@ -24,6 +24,10 @@ class ACOSharedData {
 	// Nombre de villes
 	@Accessors
 	var numberOfCities : Integer
+
+	// Nombre de clusters
+	@Accessors
+	var numberOfClusters : Integer
 	
 	// Matrice des distances entre les villes
 	@Accessors
@@ -59,8 +63,9 @@ class ACOSharedData {
 
 	new (idistances : Integer[][], ipositions : Float[][], iattachedCluster : Integer[],
 		ipheromoneEvaporationFactor : Float, ipheromoneRegulationFactor : Float, ivisibilityRegulationFactor : Float,
-		inunberOfAnts : Integer, inumberOfIterations : Integer, inumberOfCities : Integer) {
+		inunberOfAnts : Integer, inumberOfIterations : Integer, inumberOfCities : Integer, inumberOfClusters: Integer) {
 		numberOfCities = inumberOfCities
+		numberOfClusters = inumberOfClusters
 		distances = idistances
 		positions = ipositions
 		attachedCluster = iattachedCluster
