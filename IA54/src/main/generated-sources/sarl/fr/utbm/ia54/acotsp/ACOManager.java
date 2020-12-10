@@ -1,18 +1,17 @@
 package fr.utbm.ia54.acotsp;
 
-import io.sarl.core.AgentKilled;
-import io.sarl.core.AgentSpawned;
-import io.sarl.core.ContextJoined;
-import io.sarl.core.ContextLeft;
+import fr.utbm.ia54.acotsp.ACOAgent;
+import fr.utbm.ia54.acotsp.ACOParameters;
+import fr.utbm.ia54.acotsp.IterationFinished;
+import fr.utbm.ia54.acotsp.NewIteration;
+import fr.utbm.ia54.acotsp.NewOptimization;
+import fr.utbm.ia54.acotsp.OptimizationFinished;
+import io.sarl.core.DefaultContextInteractions;
 import io.sarl.core.Destroy;
 import io.sarl.core.Initialize;
+import io.sarl.core.InnerContextAccess;
+import io.sarl.core.Lifecycle;
 import io.sarl.core.Logging;
-import io.sarl.core.MemberJoined;
-import io.sarl.core.MemberLeft;
-import io.sarl.core.ParticipantJoined;
-import io.sarl.core.ParticipantLeft;
-import io.sarl.core.SpaceCreated;
-import io.sarl.core.SpaceDestroyed;
 import io.sarl.lang.annotation.ImportedCapacityFeature;
 import io.sarl.lang.annotation.PerceptGuardEvaluator;
 import io.sarl.lang.annotation.SarlElementType;
@@ -22,19 +21,40 @@ import io.sarl.lang.core.Agent;
 import io.sarl.lang.core.AtomicSkillReference;
 import io.sarl.lang.core.BuiltinCapacitiesProvider;
 import io.sarl.lang.core.DynamicSkillProvider;
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
+import java.util.Objects;
 import java.util.UUID;
 import javax.inject.Inject;
+import org.eclipse.xtext.xbase.lib.Conversions;
 import org.eclipse.xtext.xbase.lib.Extension;
+import org.eclipse.xtext.xbase.lib.IterableExtensions;
 import org.eclipse.xtext.xbase.lib.Pure;
 
 /**
  * @author Omen
  */
+@SuppressWarnings("potential_field_synchronization_problem")
 @SarlSpecification("0.11")
 @SarlElementType(19)
-@SuppressWarnings("all")
 public class ACOManager extends Agent {
+  private UUID myUUID = UUID.randomUUID();
+  
+  private ACOParameters acoParameters;
+  
+  private ArrayList<ArrayList<Integer>> paths;
+  
+  private ArrayList<Integer> pathsLength;
+  
+  private ArrayList<Integer> currentBestPath;
+  
+  private Integer currentBestPathLength;
+  
+  private Double[][] pheromones;
+  
+  private Integer numberOfIterationsDone;
+  
   private void $behaviorUnit$Initialize$0(final Initialize occurrence) {
     Logging _$CAPACITY_USE$IO_SARL_CORE_LOGGING$CALLER = this.$CAPACITY_USE$IO_SARL_CORE_LOGGING$CALLER();
     _$CAPACITY_USE$IO_SARL_CORE_LOGGING$CALLER.info("The agent was started.");
@@ -45,37 +65,112 @@ public class ACOManager extends Agent {
     _$CAPACITY_USE$IO_SARL_CORE_LOGGING$CALLER.info("The agent was stopped.");
   }
   
-  private void $behaviorUnit$AgentSpawned$2(final AgentSpawned occurrence) {
+  private void $behaviorUnit$NewOptimization$2(final NewOptimization occurrence) {
+    this.acoParameters = occurrence.acoParameters;
+    this.launchACOAgents();
+    this.launchIterations();
   }
   
-  private void $behaviorUnit$AgentKilled$3(final AgentKilled occurrence) {
+  private void $behaviorUnit$IterationFinished$3(final IterationFinished occurrence) {
+    this.paths.add(occurrence.path);
+    this.pathsLength.add(occurrence.pathLength);
+    int _size = this.paths.size();
+    Integer _nunberOfAnts = this.acoParameters.getNunberOfAnts();
+    if ((_size == ((_nunberOfAnts) == null ? 0 : (_nunberOfAnts).intValue()))) {
+      this.pheromones = this.updatePheromones();
+      this.numberOfIterationsDone++;
+      Integer _get = this.pathsLength.get(this.pathsLength.indexOf(IterableExtensions.<Integer>max(this.pathsLength)));
+      if ((_get.intValue() > this.currentBestPathLength.doubleValue())) {
+        this.currentBestPath = this.paths.get(this.pathsLength.indexOf(IterableExtensions.<Integer>max(this.pathsLength)));
+        this.currentBestPathLength = this.pathsLength.get(this.pathsLength.indexOf(IterableExtensions.<Integer>max(this.pathsLength)));
+      }
+      Integer _numberOfIterations = this.acoParameters.getNumberOfIterations();
+      if ((this.numberOfIterationsDone == _numberOfIterations)) {
+        DefaultContextInteractions _$CAPACITY_USE$IO_SARL_CORE_DEFAULTCONTEXTINTERACTIONS$CALLER = this.$CAPACITY_USE$IO_SARL_CORE_DEFAULTCONTEXTINTERACTIONS$CALLER();
+        OptimizationFinished _optimizationFinished = new OptimizationFinished(this.pheromones, this.currentBestPath, this.currentBestPathLength);
+        _$CAPACITY_USE$IO_SARL_CORE_DEFAULTCONTEXTINTERACTIONS$CALLER.emit(_optimizationFinished);
+      } else {
+        InnerContextAccess _$CAPACITY_USE$IO_SARL_CORE_INNERCONTEXTACCESS$CALLER = this.$CAPACITY_USE$IO_SARL_CORE_INNERCONTEXTACCESS$CALLER();
+        NewIteration _newIteration = new NewIteration(this.pheromones);
+        _$CAPACITY_USE$IO_SARL_CORE_INNERCONTEXTACCESS$CALLER.getInnerContext().getDefaultSpace().emit(this.getID(), _newIteration, null);
+      }
+    }
   }
   
-  private void $behaviorUnit$ContextJoined$4(final ContextJoined occurrence) {
+  protected void launchACOAgents() {
+    for (int i = 0; (i < this.acoParameters.getNunberOfAnts().doubleValue()); i++) {
+      {
+        final UUID childID = UUID.randomUUID();
+        Logging _$CAPACITY_USE$IO_SARL_CORE_LOGGING$CALLER = this.$CAPACITY_USE$IO_SARL_CORE_LOGGING$CALLER();
+        _$CAPACITY_USE$IO_SARL_CORE_LOGGING$CALLER.info(("Spawning new ACOAgent on City :" + Integer.valueOf(i)));
+        Lifecycle _$CAPACITY_USE$IO_SARL_CORE_LIFECYCLE$CALLER = this.$CAPACITY_USE$IO_SARL_CORE_LIFECYCLE$CALLER();
+        InnerContextAccess _$CAPACITY_USE$IO_SARL_CORE_INNERCONTEXTACCESS$CALLER = this.$CAPACITY_USE$IO_SARL_CORE_INNERCONTEXTACCESS$CALLER();
+        _$CAPACITY_USE$IO_SARL_CORE_LIFECYCLE$CALLER.spawnInContextWithID(ACOAgent.class, childID, _$CAPACITY_USE$IO_SARL_CORE_INNERCONTEXTACCESS$CALLER.getInnerContext(), this.myUUID, Integer.valueOf(i), this.acoParameters);
+      }
+    }
   }
   
-  private void $behaviorUnit$ContextLeft$5(final ContextLeft occurrence) {
+  protected void launchIterations() {
+    this.numberOfIterationsDone = Integer.valueOf(0);
+    this.currentBestPathLength = Integer.valueOf(0);
+    this.initializePheromones(Double.valueOf(0d));
+    ArrayList<ArrayList<Integer>> _arrayList = new ArrayList<ArrayList<Integer>>();
+    this.paths = _arrayList;
+    ArrayList<Integer> _arrayList_1 = new ArrayList<Integer>();
+    this.pathsLength = _arrayList_1;
+    InnerContextAccess _$CAPACITY_USE$IO_SARL_CORE_INNERCONTEXTACCESS$CALLER = this.$CAPACITY_USE$IO_SARL_CORE_INNERCONTEXTACCESS$CALLER();
+    NewIteration _newIteration = new NewIteration(this.pheromones);
+    _$CAPACITY_USE$IO_SARL_CORE_INNERCONTEXTACCESS$CALLER.getInnerContext().getDefaultSpace().emit(this.getID(), _newIteration, null);
   }
   
-  private void $behaviorUnit$MemberJoined$6(final MemberJoined occurrence) {
+  protected void initializePheromones(final Double initialPheromoneValue) {
+    for (int i = 0; (i < this.acoParameters.getNumberOfCities().doubleValue()); i++) {
+      {
+        Double[] temp = null;
+        for (int j = 0; (j < this.acoParameters.getNumberOfCities().doubleValue()); j++) {
+          final Double[] _converted_temp = (Double[])temp;
+          ((List<Double>)Conversions.doWrapArray(_converted_temp)).add(initialPheromoneValue);
+        }
+        ((List<Double[]>)Conversions.doWrapArray(this.pheromones)).add(temp);
+      }
+    }
   }
   
-  private void $behaviorUnit$MemberLeft$7(final MemberLeft occurrence) {
+  protected Double[][] updatePheromones() {
+    Double[][] newPheromones = null;
+    double sumOfpheromoneDelta = this.pheromoneDeltaComputation();
+    for (int i = 0; (i < this.acoParameters.getNumberOfCities().doubleValue()); i++) {
+      {
+        Double[] temp = null;
+        for (int j = 0; (j < this.acoParameters.getNumberOfCities().doubleValue()); j++) {
+          {
+            Float _pheromoneEvaporationFactor = this.acoParameters.getPheromoneEvaporationFactor();
+            Double _get = this.pheromones[i][j];
+            double newValue = ((((_pheromoneEvaporationFactor) == null ? 0 : (_pheromoneEvaporationFactor).floatValue()) * ((_get) == null ? 0 : (_get).doubleValue())) + sumOfpheromoneDelta);
+            final Double[] _converted_temp = (Double[])temp;
+            ((List<Double>)Conversions.doWrapArray(_converted_temp)).add(Double.valueOf(newValue));
+          }
+        }
+        final Double[][] _converted_newPheromones = (Double[][])newPheromones;
+        ((List<Double[]>)Conversions.doWrapArray(_converted_newPheromones)).add(temp);
+      }
+    }
+    return newPheromones;
   }
   
-  private void $behaviorUnit$MemberLeft$8(final MemberLeft occurrence) {
-  }
-  
-  private void $behaviorUnit$SpaceCreated$9(final SpaceCreated occurrence) {
-  }
-  
-  private void $behaviorUnit$SpaceDestroyed$10(final SpaceDestroyed occurrence) {
-  }
-  
-  private void $behaviorUnit$ParticipantJoined$11(final ParticipantJoined occurrence) {
-  }
-  
-  private void $behaviorUnit$ParticipantLeft$12(final ParticipantLeft occurrence) {
+  protected double pheromoneDeltaComputation() {
+    double sumOfpheromoneDelta = 0d;
+    for (int k = 0; (k < this.paths.size()); k++) {
+      for (int i = 0; (i < this.acoParameters.getNumberOfCities().doubleValue()); i++) {
+        for (int j = 0; (j < this.acoParameters.getNumberOfCities().doubleValue()); j++) {
+          if ((this.paths.get(k).contains(Integer.valueOf(i)) && this.paths.get(k).contains(Integer.valueOf(j)))) {
+            Integer _get = this.pathsLength.get(k);
+            sumOfpheromoneDelta = (sumOfpheromoneDelta + (1 / ((_get) == null ? 0 : (_get).intValue())));
+          }
+        }
+      }
+    }
+    return sumOfpheromoneDelta;
   }
   
   @Extension
@@ -92,77 +187,54 @@ public class ACOManager extends Agent {
     return $castSkill(Logging.class, this.$CAPACITY_USE$IO_SARL_CORE_LOGGING);
   }
   
+  @Extension
+  @ImportedCapacityFeature(InnerContextAccess.class)
+  @SyntheticMember
+  private transient AtomicSkillReference $CAPACITY_USE$IO_SARL_CORE_INNERCONTEXTACCESS;
+  
+  @SyntheticMember
+  @Pure
+  private InnerContextAccess $CAPACITY_USE$IO_SARL_CORE_INNERCONTEXTACCESS$CALLER() {
+    if (this.$CAPACITY_USE$IO_SARL_CORE_INNERCONTEXTACCESS == null || this.$CAPACITY_USE$IO_SARL_CORE_INNERCONTEXTACCESS.get() == null) {
+      this.$CAPACITY_USE$IO_SARL_CORE_INNERCONTEXTACCESS = $getSkill(InnerContextAccess.class);
+    }
+    return $castSkill(InnerContextAccess.class, this.$CAPACITY_USE$IO_SARL_CORE_INNERCONTEXTACCESS);
+  }
+  
+  @Extension
+  @ImportedCapacityFeature(DefaultContextInteractions.class)
+  @SyntheticMember
+  private transient AtomicSkillReference $CAPACITY_USE$IO_SARL_CORE_DEFAULTCONTEXTINTERACTIONS;
+  
+  @SyntheticMember
+  @Pure
+  private DefaultContextInteractions $CAPACITY_USE$IO_SARL_CORE_DEFAULTCONTEXTINTERACTIONS$CALLER() {
+    if (this.$CAPACITY_USE$IO_SARL_CORE_DEFAULTCONTEXTINTERACTIONS == null || this.$CAPACITY_USE$IO_SARL_CORE_DEFAULTCONTEXTINTERACTIONS.get() == null) {
+      this.$CAPACITY_USE$IO_SARL_CORE_DEFAULTCONTEXTINTERACTIONS = $getSkill(DefaultContextInteractions.class);
+    }
+    return $castSkill(DefaultContextInteractions.class, this.$CAPACITY_USE$IO_SARL_CORE_DEFAULTCONTEXTINTERACTIONS);
+  }
+  
+  @Extension
+  @ImportedCapacityFeature(Lifecycle.class)
+  @SyntheticMember
+  private transient AtomicSkillReference $CAPACITY_USE$IO_SARL_CORE_LIFECYCLE;
+  
+  @SyntheticMember
+  @Pure
+  private Lifecycle $CAPACITY_USE$IO_SARL_CORE_LIFECYCLE$CALLER() {
+    if (this.$CAPACITY_USE$IO_SARL_CORE_LIFECYCLE == null || this.$CAPACITY_USE$IO_SARL_CORE_LIFECYCLE.get() == null) {
+      this.$CAPACITY_USE$IO_SARL_CORE_LIFECYCLE = $getSkill(Lifecycle.class);
+    }
+    return $castSkill(Lifecycle.class, this.$CAPACITY_USE$IO_SARL_CORE_LIFECYCLE);
+  }
+  
   @SyntheticMember
   @PerceptGuardEvaluator
   private void $guardEvaluator$Initialize(final Initialize occurrence, final Collection<Runnable> ___SARLlocal_runnableCollection) {
     assert occurrence != null;
     assert ___SARLlocal_runnableCollection != null;
     ___SARLlocal_runnableCollection.add(() -> $behaviorUnit$Initialize$0(occurrence));
-  }
-  
-  @SyntheticMember
-  @PerceptGuardEvaluator
-  private void $guardEvaluator$ContextLeft(final ContextLeft occurrence, final Collection<Runnable> ___SARLlocal_runnableCollection) {
-    assert occurrence != null;
-    assert ___SARLlocal_runnableCollection != null;
-    ___SARLlocal_runnableCollection.add(() -> $behaviorUnit$ContextLeft$5(occurrence));
-  }
-  
-  @SyntheticMember
-  @PerceptGuardEvaluator
-  private void $guardEvaluator$SpaceDestroyed(final SpaceDestroyed occurrence, final Collection<Runnable> ___SARLlocal_runnableCollection) {
-    assert occurrence != null;
-    assert ___SARLlocal_runnableCollection != null;
-    ___SARLlocal_runnableCollection.add(() -> $behaviorUnit$SpaceDestroyed$10(occurrence));
-  }
-  
-  @SyntheticMember
-  @PerceptGuardEvaluator
-  private void $guardEvaluator$ContextJoined(final ContextJoined occurrence, final Collection<Runnable> ___SARLlocal_runnableCollection) {
-    assert occurrence != null;
-    assert ___SARLlocal_runnableCollection != null;
-    ___SARLlocal_runnableCollection.add(() -> $behaviorUnit$ContextJoined$4(occurrence));
-  }
-  
-  @SyntheticMember
-  @PerceptGuardEvaluator
-  private void $guardEvaluator$MemberLeft(final MemberLeft occurrence, final Collection<Runnable> ___SARLlocal_runnableCollection) {
-    assert occurrence != null;
-    assert ___SARLlocal_runnableCollection != null;
-    ___SARLlocal_runnableCollection.add(() -> $behaviorUnit$MemberLeft$7(occurrence));
-    ___SARLlocal_runnableCollection.add(() -> $behaviorUnit$MemberLeft$8(occurrence));
-  }
-  
-  @SyntheticMember
-  @PerceptGuardEvaluator
-  private void $guardEvaluator$SpaceCreated(final SpaceCreated occurrence, final Collection<Runnable> ___SARLlocal_runnableCollection) {
-    assert occurrence != null;
-    assert ___SARLlocal_runnableCollection != null;
-    ___SARLlocal_runnableCollection.add(() -> $behaviorUnit$SpaceCreated$9(occurrence));
-  }
-  
-  @SyntheticMember
-  @PerceptGuardEvaluator
-  private void $guardEvaluator$AgentSpawned(final AgentSpawned occurrence, final Collection<Runnable> ___SARLlocal_runnableCollection) {
-    assert occurrence != null;
-    assert ___SARLlocal_runnableCollection != null;
-    ___SARLlocal_runnableCollection.add(() -> $behaviorUnit$AgentSpawned$2(occurrence));
-  }
-  
-  @SyntheticMember
-  @PerceptGuardEvaluator
-  private void $guardEvaluator$ParticipantJoined(final ParticipantJoined occurrence, final Collection<Runnable> ___SARLlocal_runnableCollection) {
-    assert occurrence != null;
-    assert ___SARLlocal_runnableCollection != null;
-    ___SARLlocal_runnableCollection.add(() -> $behaviorUnit$ParticipantJoined$11(occurrence));
-  }
-  
-  @SyntheticMember
-  @PerceptGuardEvaluator
-  private void $guardEvaluator$ParticipantLeft(final ParticipantLeft occurrence, final Collection<Runnable> ___SARLlocal_runnableCollection) {
-    assert occurrence != null;
-    assert ___SARLlocal_runnableCollection != null;
-    ___SARLlocal_runnableCollection.add(() -> $behaviorUnit$ParticipantLeft$12(occurrence));
   }
   
   @SyntheticMember
@@ -175,18 +247,60 @@ public class ACOManager extends Agent {
   
   @SyntheticMember
   @PerceptGuardEvaluator
-  private void $guardEvaluator$AgentKilled(final AgentKilled occurrence, final Collection<Runnable> ___SARLlocal_runnableCollection) {
+  private void $guardEvaluator$NewOptimization(final NewOptimization occurrence, final Collection<Runnable> ___SARLlocal_runnableCollection) {
     assert occurrence != null;
     assert ___SARLlocal_runnableCollection != null;
-    ___SARLlocal_runnableCollection.add(() -> $behaviorUnit$AgentKilled$3(occurrence));
+    ___SARLlocal_runnableCollection.add(() -> $behaviorUnit$NewOptimization$2(occurrence));
   }
   
   @SyntheticMember
   @PerceptGuardEvaluator
-  private void $guardEvaluator$MemberJoined(final MemberJoined occurrence, final Collection<Runnable> ___SARLlocal_runnableCollection) {
+  private void $guardEvaluator$IterationFinished(final IterationFinished occurrence, final Collection<Runnable> ___SARLlocal_runnableCollection) {
     assert occurrence != null;
     assert ___SARLlocal_runnableCollection != null;
-    ___SARLlocal_runnableCollection.add(() -> $behaviorUnit$MemberJoined$6(occurrence));
+    ___SARLlocal_runnableCollection.add(() -> $behaviorUnit$IterationFinished$3(occurrence));
+  }
+  
+  @Override
+  @Pure
+  @SyntheticMember
+  public boolean equals(final Object obj) {
+    if (this == obj)
+      return true;
+    if (obj == null)
+      return false;
+    if (getClass() != obj.getClass())
+      return false;
+    ACOManager other = (ACOManager) obj;
+    if (!Objects.equals(this.myUUID, other.myUUID))
+      return false;
+    if (other.currentBestPathLength == null) {
+      if (this.currentBestPathLength != null)
+        return false;
+    } else if (this.currentBestPathLength == null)
+      return false;
+    if (other.currentBestPathLength != null && other.currentBestPathLength.intValue() != this.currentBestPathLength.intValue())
+      return false;
+    if (other.numberOfIterationsDone == null) {
+      if (this.numberOfIterationsDone != null)
+        return false;
+    } else if (this.numberOfIterationsDone == null)
+      return false;
+    if (other.numberOfIterationsDone != null && other.numberOfIterationsDone.intValue() != this.numberOfIterationsDone.intValue())
+      return false;
+    return super.equals(obj);
+  }
+  
+  @Override
+  @Pure
+  @SyntheticMember
+  public int hashCode() {
+    int result = super.hashCode();
+    final int prime = 31;
+    result = prime * result + Objects.hashCode(this.myUUID);
+    result = prime * result + Objects.hashCode(this.currentBestPathLength);
+    result = prime * result + Objects.hashCode(this.numberOfIterationsDone);
+    return result;
   }
   
   @SyntheticMember

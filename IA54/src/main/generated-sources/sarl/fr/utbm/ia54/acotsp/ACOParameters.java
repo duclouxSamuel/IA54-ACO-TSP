@@ -10,7 +10,7 @@ import org.eclipse.xtext.xbase.lib.Pure;
 @SarlSpecification("0.11")
 @SarlElementType(10)
 @SuppressWarnings("all")
-public class ACOSharedData {
+public class ACOParameters {
   @Accessors
   private Integer numberOfCities;
   
@@ -41,7 +41,7 @@ public class ACOSharedData {
   @Accessors
   private Integer numberOfIterations;
   
-  public ACOSharedData(final Integer[][] idistances, final Float[][] ipositions, final Integer[] iattachedCluster, final Float ipheromoneEvaporationFactor, final Float ipheromoneRegulationFactor, final Float ivisibilityRegulationFactor, final Integer inunberOfAnts, final Integer inumberOfIterations, final Integer inumberOfCities, final Integer inumberOfClusters) {
+  public ACOParameters(final Integer[][] idistances, final Float[][] ipositions, final Integer[] iattachedCluster, final Float ipheromoneEvaporationFactor, final Float ipheromoneRegulationFactor, final Float ivisibilityRegulationFactor, final Integer inunberOfAnts, final Integer inumberOfIterations, final Integer inumberOfCities, final Integer inumberOfClusters) {
     this.numberOfCities = inumberOfCities;
     this.numberOfClusters = inumberOfClusters;
     this.distances = idistances;
@@ -64,7 +64,7 @@ public class ACOSharedData {
       return false;
     if (getClass() != obj.getClass())
       return false;
-    ACOSharedData other = (ACOSharedData) obj;
+    ACOParameters other = (ACOParameters) obj;
     if (other.numberOfCities == null) {
       if (this.numberOfCities != null)
         return false;

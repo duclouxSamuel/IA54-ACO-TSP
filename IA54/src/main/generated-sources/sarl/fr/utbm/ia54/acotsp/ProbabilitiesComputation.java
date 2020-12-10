@@ -6,6 +6,9 @@ import io.sarl.lang.core.AgentTrait;
 import io.sarl.lang.core.Capacity;
 import java.util.ArrayList;
 
+/**
+ * @author yaben
+ */
 @FunctionalInterface
 @SarlSpecification("0.11")
 @SarlElementType(20)

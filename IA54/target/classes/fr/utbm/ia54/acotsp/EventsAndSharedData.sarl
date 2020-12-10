@@ -4,22 +4,52 @@
 package fr.utbm.ia54.acotsp
 
 import org.eclipse.xtend.lib.annotations.Accessors
+import java.util.ArrayList
 
 /** 
  * @author yaben
  * 
  */
- 
- 
+event NewOptimization {
+	var acoParameters : ACOParameters
+
+	new (p : ACOParameters) {
+		acoParameters = p
+	}
+}
+
 event NewIteration {
 	var pheromones : Double[][]
 
 	new(p : Double[][]) {
 		pheromones = p
 	}
-} 
+}
 
-class ACOSharedData {
+event IterationFinished {
+	var path : ArrayList<Integer>
+	var pathLength : Integer
+
+	new(p : ArrayList<Integer>, pl : Integer) {
+		path = p
+		pathLength = pl
+	}
+
+}
+
+event OptimizationFinished {
+	var pheromones : Double[][]
+	var bestPath : ArrayList<Integer>
+	var bestPathLength : Integer
+	
+	new(p : Double[][], bstPath : ArrayList<Integer>, bstPathLength: Integer) {
+		pheromones = p
+		bestPath = bstPath
+		bestPathLength = bstPathLength
+	}
+}
+
+class ACOParameters {
 
 	// Nombre de villes
 	@Accessors
@@ -28,7 +58,7 @@ class ACOSharedData {
 	// Nombre de clusters
 	@Accessors
 	var numberOfClusters : Integer
-	
+
 	// Matrice des distances entre les villes
 	@Accessors
 	var distances : Integer[][]
@@ -63,7 +93,8 @@ class ACOSharedData {
 
 	new (idistances : Integer[][], ipositions : Float[][], iattachedCluster : Integer[],
 		ipheromoneEvaporationFactor : Float, ipheromoneRegulationFactor : Float, ivisibilityRegulationFactor : Float,
-		inunberOfAnts : Integer, inumberOfIterations : Integer, inumberOfCities : Integer, inumberOfClusters: Integer) {
+		inunberOfAnts : Integer, inumberOfIterations : Integer, inumberOfCities : Integer,
+		inumberOfClusters : Integer) {
 		numberOfCities = inumberOfCities
 		numberOfClusters = inumberOfClusters
 		distances = idistances

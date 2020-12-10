@@ -8,127 +8,8 @@ import io.sarl.core.Initialize
 import io.sarl.core.Logging
 import java.util.UUID
 import java.util.ArrayList
-import io.sarl.core.InnerContextAccess
 import io.sarl.core.DefaultContextInteractions
 import io.sarl.core.Lifecycle
-import io.sarl.core.Schedules
-
-capacity ProbabilitiesComputation {
-	def probabilitiesComputation(currentCity : Integer, probabilities : ArrayList<Float>,
-		visitedCities : ArrayList<Integer>, visitedClusterss : ArrayList<Integer>,
-		pheromones : Double[][]) : ArrayList<Float>
-}
-
-@SuppressWarnings("potential_field_synchronization_problem")
-skill SimpleProbabilitiesComputationSkill implements ProbabilitiesComputation {
-
-	var numberOfCities : Integer
-	var distances : Integer[][]
-	var attachedCluster : Integer[]
-	var pheromoneRegulationFactor : Float
-	var visibilityRegulationFactor : Float
-
-	new (
-		inumberOfCities : Integer,
-		idistances : Integer[][],
-		iattachedCluster : Integer[],
-		ipheromoneRegulationFactor : Float,
-		ivisibilityRegulationFactor : Float
-	) {
-		this.numberOfCities = inumberOfCities
-		this.distances = idistances
-		this.attachedCluster = iattachedCluster
-		this.pheromoneRegulationFactor = ipheromoneRegulationFactor
-		this.visibilityRegulationFactor = ivisibilityRegulationFactor
-	}
-
-	def probabilitiesComputation(currentCity : Integer, probabilities : ArrayList<Float>,
-		visitedCities : ArrayList<Integer>, visitedClusters : ArrayList<Integer>,
-		pheromones : Double[][]) : ArrayList<Float> {
-		var sumOfAllowedCities = 0d
-
-		for (var i = 0; i < numberOfCities; i++) {
-			if (!visitedClusters.contains(attachedCluster.get(i)))
-				sumOfAllowedCities +=
-					Math.pow(pheromones.get(currentCity).get(i) as double, pheromoneRegulationFactor) *
-						Math.pow(1 / distances.get(currentCity).get(i) as double, visibilityRegulationFactor)
-		}
-		for (var i = 0; i < numberOfCities; i++) {
-			var probability = 0d
-			if (!visitedClusters.contains(attachedCluster.get(i))) {
-				probability = Math.pow(pheromones.get(currentCity).get(i) as double, pheromoneRegulationFactor) *
-					Math.pow(1 / distances.get(currentCity).get(i) as double, visibilityRegulationFactor) /
-					sumOfAllowedCities
-			}
-			probabilities.add(probability.toFloat)
-		}
-
-		return probabilities
-	}
-
-}
-
-@SuppressWarnings("potential_field_synchronization_problem")
-skill ProbabilitiesComputationWithGroupInfluenceSkill implements ProbabilitiesComputation {
-	var numberOfCities : Integer
-	var distances : Integer[][]
-	var attachedCluster : Integer[]
-	var pheromoneRegulationFactor : Float
-	var visibilityRegulationFactor : Float
-
-	new (
-		inumberOfCities : Integer,
-		idistances : Integer[][],
-		iattachedCluster : Integer[],
-		ipheromoneRegulationFactor : Float,
-		ivisibilityRegulationFactor : Float
-	) {
-		this.numberOfCities = inumberOfCities
-		this.distances = idistances
-		this.attachedCluster = iattachedCluster
-		this.pheromoneRegulationFactor = ipheromoneRegulationFactor
-		this.visibilityRegulationFactor = ivisibilityRegulationFactor
-	}
-
-	def probabilitiesComputation(currentCity : Integer, probabilities : ArrayList<Float>,
-		visitedCities : ArrayList<Integer>, visitedClusters : ArrayList<Integer>,
-		pheromones : Double[][]) : ArrayList<Float> {
-		var sumOfAllowedCities = 0d
-		var sumOfAllowedCitiesWithGroupInfluence = 0d
-		var factorOfAllowedCitiesGroup : ArrayList<Double> = new ArrayList<Double> 
-		for (var i = 0; i < numberOfCities; i++) {
-			if (!visitedClusters.contains(attachedCluster.get(i)))
-				sumOfAllowedCities +=
-					Math.pow(pheromones.get(currentCity).get(i) as double, pheromoneRegulationFactor) *
-						Math.pow(1 / distances.get(currentCity).get(i) as double, visibilityRegulationFactor)
-		}
-		for (var i = 0; i < numberOfCities; i++) {
-			var sumOfClusterCities = 0d
-			if (!visitedClusters.contains(attachedCluster.get(i)))
-				sumOfClusterCities +=
-					Math.pow(pheromones.get(currentCity).get(i) as double, pheromoneRegulationFactor) *
-						Math.pow(1 / distances.get(currentCity).get(i) as double, visibilityRegulationFactor)
-			factorOfAllowedCitiesGroup.add(sumOfClusterCities / sumOfAllowedCities)
-		}
-		for (var i = 0; i < numberOfCities; i++) {
-			if (!visitedClusters.contains(attachedCluster.get(i)))
-				sumOfAllowedCitiesWithGroupInfluence +=
-					Math.pow(pheromones.get(currentCity).get(i) as double, pheromoneRegulationFactor) *
-						Math.pow(1 / distances.get(currentCity).get(i) as double, visibilityRegulationFactor) *
-					factorOfAllowedCitiesGroup.get(i)
-		}
-		
-		for (var i = 0; i < numberOfCities; i++) {
-			var probability = Math.pow(pheromones.get(currentCity).get(i) as double, pheromoneRegulationFactor) *
-				Math.pow(1 / distances.get(currentCity).get(i) as double, visibilityRegulationFactor) *
-				factorOfAllowedCitiesGroup.get(i) / sumOfAllowedCitiesWithGroupInfluence
-			probabilities.add(probability.toFloat)
-		}
-
-		return probabilities
-	}
-
-}
 
 /** 
  * @author Omen
@@ -136,31 +17,21 @@ skill ProbabilitiesComputationWithGroupInfluenceSkill implements ProbabilitiesCo
  */
 @SuppressWarnings("potential_field_synchronization_problem")
 agent ACOAgent {
-	uses Logging, InnerContextAccess, DefaultContextInteractions, Lifecycle, Schedules
+	uses Logging, DefaultContextInteractions, Lifecycle
 
 	uses ProbabilitiesComputation
 
 	var environment : UUID
 
-	var numberOfCities : Integer
-	
-	var numberOfClusters : Integer 
-
 	var startingCity : Integer
 
-	var distances : Integer[][]
-
-	var attachedCluster : Integer[]
+	var acoParameters : ACOParameters
 
 	var pheromones : Double[][]
 
-	var pheromoneRegulationFactor : Float
-
-	var visibilityRegulationFactor : Float
-
 	var currentCity : Integer
 
-	var currentPathLength : Integer
+	var currentPathLength : Integer 
 
 	var visitedCities : ArrayList<Integer>
 
@@ -176,52 +47,45 @@ agent ACOAgent {
 				startingCity = occurrence.parameters.get(1) as Integer
 			}
 
-			if (occurrence.parameters.get(2) instanceof Integer[][]) {
-				distances = occurrence.parameters.get(2) as Integer[][]
-			}
-			if (occurrence.parameters.get(3) instanceof Float) {
-				pheromoneRegulationFactor = occurrence.parameters.get(3) as Float
-			}
-			if (occurrence.parameters.get(4) instanceof Float) {
-				visibilityRegulationFactor = occurrence.parameters.get(4) as Float
-			}
-			if (occurrence.parameters.get(5) instanceof Integer) {
-				numberOfCities = occurrence.parameters.get(5) as Integer
-			}
-			if (occurrence.parameters.get(6) instanceof Integer) {
-				numberOfClusters = occurrence.parameters.get(6) as Integer
-			}
-			if (occurrence.parameters.get(7) instanceof Integer[]) {
-				attachedCluster = occurrence.parameters.get(7) as Integer[]
-			}
-			if (occurrence.parameters.get(8) instanceof String) {
-				loggingName = occurrence.parameters.get(8) as String
+			if (occurrence.parameters.get(2) instanceof ACOParameters) {
+				acoParameters = occurrence.parameters.get(2) as ACOParameters
 			}
 		}
 		setSkill(
-			new ProbabilitiesComputationWithGroupInfluenceSkill(numberOfCities, distances, attachedCluster,
-				pheromoneRegulationFactor, visibilityRegulationFactor), ProbabilitiesComputation)
-
+			new ProbabilitiesComputationWithGroupInfluenceSkill(acoParameters.numberOfCities, acoParameters.distances,
+				acoParameters.attachedCluster, acoParameters.pheromoneRegulationFactor,
+				acoParameters.visibilityRegulationFactor), ProbabilitiesComputation)
 		info("The agent was started.")
 	}
 
 	on NewIteration {
-		this.pheromones = occurrence.pheromones
+		pheromones = occurrence.pheromones
+		buildPath()
+		emit(new IterationFinished(visitedCities, currentPathLength))[it.UUID == environment]
+	}
+	
+	on OptimizationFinished {
+		killMe
 	}
 
-	def contstructPath() : void {
+	def buildPath() : void {
 		visitedCities = new ArrayList<Integer>
-		this.currentCity = startingCity
+		visitedClusters = new ArrayList<Integer>
+		currentPathLength = 0
+		currentCity = startingCity
 		visitedCities.add(startingCity)
-		visitedClusters.add(attachedCluster.get(startingCity))
-		while (visitedClusters.size() < numberOfClusters) {
+		visitedClusters.add(acoParameters.attachedCluster.get(startingCity))
+		while (visitedClusters.size() < acoParameters.numberOfClusters) {
 			var probabilities = new ArrayList<Float>
 			probabilities = probabilitiesComputation(currentCity, probabilities, visitedCities, visitedClusters,
 				pheromones)
 			var nextVisitedCity = probabilities.indexOf(probabilities.max())
+			currentPathLength = currentPathLength + acoParameters.distances.get(currentCity).get(nextVisitedCity)
+			currentCity = nextVisitedCity
 			visitedCities.add(nextVisitedCity)
-			visitedClusters.add(attachedCluster.get(nextVisitedCity))	
+			visitedClusters.add(acoParameters.attachedCluster.get(nextVisitedCity))
 		}
+		currentPathLength = currentPathLength + acoParameters.distances.get(currentCity).get(startingCity)
 	}
 
 	on Destroy {
