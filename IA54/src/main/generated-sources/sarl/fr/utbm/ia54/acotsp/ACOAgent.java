@@ -6,6 +6,7 @@ import fr.utbm.ia54.acotsp.IterationFinished;
 import fr.utbm.ia54.acotsp.NewIteration;
 import fr.utbm.ia54.acotsp.OptimizationFinished;
 import fr.utbm.ia54.acotsp.ProbabilitiesComputation;
+import fr.utbm.ia54.acotsp.ProbabilitiesComputationWithGroupInfluenceSkill;
 import io.sarl.core.DefaultContextInteractions;
 import io.sarl.core.Destroy;
 import io.sarl.core.Initialize;
@@ -26,8 +27,10 @@ import io.sarl.lang.util.SerializableProxy;
 import java.io.ObjectStreamException;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 import java.util.UUID;
 import javax.inject.Inject;
+import org.eclipse.xtext.xbase.lib.Conversions;
 import org.eclipse.xtext.xbase.lib.Extension;
 import org.eclipse.xtext.xbase.lib.IterableExtensions;
 import org.eclipse.xtext.xbase.lib.Pure;
@@ -49,16 +52,40 @@ public class ACOAgent extends Agent {
   
   private Integer currentCity;
   
-  private Integer currentPathLength;
+  private Float currentPathLength;
   
   private ArrayList<Integer> visitedCities;
   
   private ArrayList<Integer> visitedClusters;
   
   private void $behaviorUnit$Initialize$0(final Initialize occurrence) {
-    throw new Error("Unresolved compilation problems:"
-      + "\nBounds mismatch: The type argument <ProbabilitiesComputationWithGroupInfluenceSkill> is not a valid substitute for the bounded type parameter <S extends Skill> of the method setSkill(S, Class<? extends Capacity>[])"
-      + "\nType mismatch: cannot convert from Class<ProbabilitiesComputation> to Class<? extends Capacity>[]");
+    int _size = ((List<Object>)Conversions.doWrapArray(occurrence.parameters)).size();
+    if ((_size > 8)) {
+      Object _get = occurrence.parameters[0];
+      if ((_get instanceof UUID)) {
+        Object _get_1 = occurrence.parameters[0];
+        this.environment = ((UUID) _get_1);
+      }
+      Object _get_2 = occurrence.parameters[1];
+      if ((_get_2 instanceof Integer)) {
+        Object _get_3 = occurrence.parameters[1];
+        this.startingCity = ((Integer) _get_3);
+      }
+      Object _get_4 = occurrence.parameters[2];
+      if ((_get_4 instanceof ACOParameters)) {
+        Object _get_5 = occurrence.parameters[2];
+        this.acoParameters = ((ACOParameters) _get_5);
+      }
+    }
+    Integer _numberOfCities = this.acoParameters.getNumberOfCities();
+    Float[][] _distances = this.acoParameters.getDistances();
+    Integer[] _attachedCluster = this.acoParameters.getAttachedCluster();
+    Float _pheromoneRegulationFactor = this.acoParameters.getPheromoneRegulationFactor();
+    Float _visibilityRegulationFactor = this.acoParameters.getVisibilityRegulationFactor();
+    ProbabilitiesComputationWithGroupInfluenceSkill _probabilitiesComputationWithGroupInfluenceSkill = new ProbabilitiesComputationWithGroupInfluenceSkill(_numberOfCities, _distances, _attachedCluster, _pheromoneRegulationFactor, _visibilityRegulationFactor);
+    this.<ProbabilitiesComputationWithGroupInfluenceSkill>setSkill(_probabilitiesComputationWithGroupInfluenceSkill, ProbabilitiesComputation.class);
+    Logging _$CAPACITY_USE$IO_SARL_CORE_LOGGING$CALLER = this.$CAPACITY_USE$IO_SARL_CORE_LOGGING$CALLER();
+    _$CAPACITY_USE$IO_SARL_CORE_LOGGING$CALLER.info("The agent was started.");
   }
   
   private void $behaviorUnit$NewIteration$1(final NewIteration occurrence) {
@@ -103,7 +130,8 @@ public class ACOAgent extends Agent {
     this.visitedCities = _arrayList;
     ArrayList<Integer> _arrayList_1 = new ArrayList<Integer>();
     this.visitedClusters = _arrayList_1;
-    this.currentPathLength = Integer.valueOf(0);
+    Float _float = new Float(0);
+    this.currentPathLength = _float;
     this.currentCity = this.startingCity;
     this.visitedCities.add(this.startingCity);
     this.visitedClusters.add(this.acoParameters.getAttachedCluster()[((this.startingCity) == null ? 0 : (this.startingCity).intValue())]);
@@ -114,15 +142,15 @@ public class ACOAgent extends Agent {
         probabilities = _$CAPACITY_USE$FR_UTBM_IA54_ACOTSP_PROBABILITIESCOMPUTATION$CALLER.probabilitiesComputation(this.currentCity, probabilities, this.visitedCities, this.visitedClusters, 
           this.pheromones);
         int nextVisitedCity = probabilities.indexOf(IterableExtensions.<Float>max(probabilities));
-        Integer _get = this.acoParameters.getDistances()[((this.currentCity) == null ? 0 : (this.currentCity).intValue())][nextVisitedCity];
-        this.currentPathLength = Integer.valueOf((((this.currentPathLength) == null ? 0 : (this.currentPathLength).intValue()) + ((_get) == null ? 0 : (_get).intValue())));
+        Float _get = this.acoParameters.getDistances()[((this.currentCity) == null ? 0 : (this.currentCity).intValue())][nextVisitedCity];
+        this.currentPathLength = Float.valueOf((((this.currentPathLength) == null ? 0 : (this.currentPathLength).floatValue()) + ((_get) == null ? 0 : (_get).floatValue())));
         this.currentCity = Integer.valueOf(nextVisitedCity);
         this.visitedCities.add(Integer.valueOf(nextVisitedCity));
         this.visitedClusters.add(this.acoParameters.getAttachedCluster()[nextVisitedCity]);
       }
     }
-    Integer _get = this.acoParameters.getDistances()[((this.currentCity) == null ? 0 : (this.currentCity).intValue())][((this.startingCity) == null ? 0 : (this.startingCity).intValue())];
-    this.currentPathLength = Integer.valueOf((((this.currentPathLength) == null ? 0 : (this.currentPathLength).intValue()) + ((_get) == null ? 0 : (_get).intValue())));
+    Float _get = this.acoParameters.getDistances()[((this.currentCity) == null ? 0 : (this.currentCity).intValue())][((this.startingCity) == null ? 0 : (this.startingCity).intValue())];
+    this.currentPathLength = Float.valueOf((((this.currentPathLength) == null ? 0 : (this.currentPathLength).floatValue()) + ((_get) == null ? 0 : (_get).floatValue())));
   }
   
   private void $behaviorUnit$Destroy$3(final Destroy occurrence) {
@@ -249,8 +277,7 @@ public class ACOAgent extends Agent {
       if (this.currentPathLength != null)
         return false;
     } else if (this.currentPathLength == null)
-      return false;
-    if (other.currentPathLength != null && other.currentPathLength.intValue() != this.currentPathLength.intValue())
+      return false;if (other.currentPathLength != null && Float.floatToIntBits(other.currentPathLength.floatValue()) != Float.floatToIntBits(this.currentPathLength.floatValue()))
       return false;
     return super.equals(obj);
   }

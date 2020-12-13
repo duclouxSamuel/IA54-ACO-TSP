@@ -19,14 +19,14 @@ capacity ProbabilitiesComputation {
 skill SimpleProbabilitiesComputationSkill implements ProbabilitiesComputation {
 
 	var numberOfCities : Integer
-	var distances : Integer[][]
+	var distances : Float[][]
 	var attachedCluster : Integer[]
 	var pheromoneRegulationFactor : Float
 	var visibilityRegulationFactor : Float
 
 	new (
 		inumberOfCities : Integer,
-		idistances : Integer[][],
+		idistances : Float[][],
 		iattachedCluster : Integer[],
 		ipheromoneRegulationFactor : Float,
 		ivisibilityRegulationFactor : Float
@@ -67,14 +67,14 @@ skill SimpleProbabilitiesComputationSkill implements ProbabilitiesComputation {
 @SuppressWarnings("potential_field_synchronization_problem")
 skill ProbabilitiesComputationWithGroupInfluenceSkill implements ProbabilitiesComputation {
 	var numberOfCities : Integer
-	var distances : Integer[][]
+	var distances : Float[][]
 	var attachedCluster : Integer[]
 	var pheromoneRegulationFactor : Float
 	var visibilityRegulationFactor : Float
 
 	new (
 		inumberOfCities : Integer,
-		idistances : Integer[][],
+		idistances : Float[][],
 		iattachedCluster : Integer[],
 		ipheromoneRegulationFactor : Float,
 		ivisibilityRegulationFactor : Float

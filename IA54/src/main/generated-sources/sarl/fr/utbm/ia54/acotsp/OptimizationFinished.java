@@ -17,9 +17,9 @@ public class OptimizationFinished extends Event {
   
   public ArrayList<Integer> bestPath;
   
-  public Integer bestPathLength;
+  public Float bestPathLength;
   
-  public OptimizationFinished(final Double[][] p, final ArrayList<Integer> bstPath, final Integer bstPathLength) {
+  public OptimizationFinished(final Double[][] p, final ArrayList<Integer> bstPath, final Float bstPathLength) {
     this.pheromones = p;
     this.bestPath = bstPath;
     this.bestPathLength = bstPathLength;
@@ -40,8 +40,7 @@ public class OptimizationFinished extends Event {
       if (this.bestPathLength != null)
         return false;
     } else if (this.bestPathLength == null)
-      return false;
-    if (other.bestPathLength != null && other.bestPathLength.intValue() != this.bestPathLength.intValue())
+      return false;if (other.bestPathLength != null && Float.floatToIntBits(other.bestPathLength.floatValue()) != Float.floatToIntBits(this.bestPathLength.floatValue()))
       return false;
     return super.equals(obj);
   }
@@ -69,5 +68,5 @@ public class OptimizationFinished extends Event {
   }
   
   @SyntheticMember
-  private static final long serialVersionUID = 2637368863L;
+  private static final long serialVersionUID = 4318728671L;
 }

@@ -45,11 +45,11 @@ public class ACOManager extends Agent {
   
   private ArrayList<ArrayList<Integer>> paths;
   
-  private ArrayList<Integer> pathsLength;
+  private ArrayList<Float> pathsLength;
   
   private ArrayList<Integer> currentBestPath;
   
-  private Integer currentBestPathLength;
+  private Float currentBestPathLength;
   
   private Double[][] pheromones;
   
@@ -79,10 +79,10 @@ public class ACOManager extends Agent {
     if ((_size == ((_nunberOfAnts) == null ? 0 : (_nunberOfAnts).intValue()))) {
       this.pheromones = this.updatePheromones();
       this.numberOfIterationsDone++;
-      Integer _get = this.pathsLength.get(this.pathsLength.indexOf(IterableExtensions.<Integer>max(this.pathsLength)));
-      if ((_get.intValue() > this.currentBestPathLength.doubleValue())) {
-        this.currentBestPath = this.paths.get(this.pathsLength.indexOf(IterableExtensions.<Integer>max(this.pathsLength)));
-        this.currentBestPathLength = this.pathsLength.get(this.pathsLength.indexOf(IterableExtensions.<Integer>max(this.pathsLength)));
+      Float _get = this.pathsLength.get(this.pathsLength.indexOf(IterableExtensions.<Float>max(this.pathsLength)));
+      if ((_get.floatValue() > this.currentBestPathLength.doubleValue())) {
+        this.currentBestPath = this.paths.get(this.pathsLength.indexOf(IterableExtensions.<Float>max(this.pathsLength)));
+        this.currentBestPathLength = this.pathsLength.get(this.pathsLength.indexOf(IterableExtensions.<Float>max(this.pathsLength)));
       }
       Integer _numberOfIterations = this.acoParameters.getNumberOfIterations();
       if ((this.numberOfIterationsDone == _numberOfIterations)) {
@@ -112,11 +112,12 @@ public class ACOManager extends Agent {
   
   protected void launchIterations() {
     this.numberOfIterationsDone = Integer.valueOf(0);
-    this.currentBestPathLength = Integer.valueOf(0);
+    Float _float = new Float(0);
+    this.currentBestPathLength = _float;
     this.initializePheromones(Double.valueOf(0d));
     ArrayList<ArrayList<Integer>> _arrayList = new ArrayList<ArrayList<Integer>>();
     this.paths = _arrayList;
-    ArrayList<Integer> _arrayList_1 = new ArrayList<Integer>();
+    ArrayList<Float> _arrayList_1 = new ArrayList<Float>();
     this.pathsLength = _arrayList_1;
     InnerContextAccess _$CAPACITY_USE$IO_SARL_CORE_INNERCONTEXTACCESS$CALLER = this.$CAPACITY_USE$IO_SARL_CORE_INNERCONTEXTACCESS$CALLER();
     NewIteration _newIteration = new NewIteration(this.pheromones);
@@ -164,8 +165,8 @@ public class ACOManager extends Agent {
       for (int i = 0; (i < this.acoParameters.getNumberOfCities().doubleValue()); i++) {
         for (int j = 0; (j < this.acoParameters.getNumberOfCities().doubleValue()); j++) {
           if ((this.paths.get(k).contains(Integer.valueOf(i)) && this.paths.get(k).contains(Integer.valueOf(j)))) {
-            Integer _get = this.pathsLength.get(k);
-            sumOfpheromoneDelta = (sumOfpheromoneDelta + (1 / ((_get) == null ? 0 : (_get).intValue())));
+            Float _get = this.pathsLength.get(k);
+            sumOfpheromoneDelta = (sumOfpheromoneDelta + (1 / ((_get) == null ? 0 : (_get).floatValue())));
           }
         }
       }
@@ -278,8 +279,7 @@ public class ACOManager extends Agent {
       if (this.currentBestPathLength != null)
         return false;
     } else if (this.currentBestPathLength == null)
-      return false;
-    if (other.currentBestPathLength != null && other.currentBestPathLength.intValue() != this.currentBestPathLength.intValue())
+      return false;if (other.currentBestPathLength != null && Float.floatToIntBits(other.currentBestPathLength.floatValue()) != Float.floatToIntBits(this.currentBestPathLength.floatValue()))
       return false;
     if (other.numberOfIterationsDone == null) {
       if (this.numberOfIterationsDone != null)

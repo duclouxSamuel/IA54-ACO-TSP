@@ -15,7 +15,7 @@ import org.eclipse.xtext.xbase.lib.Pure;
 public class SimpleProbabilitiesComputationSkill extends Skill implements ProbabilitiesComputation {
   private Integer numberOfCities;
   
-  private Integer[][] distances;
+  private Float[][] distances;
   
   private Integer[] attachedCluster;
   
@@ -23,7 +23,7 @@ public class SimpleProbabilitiesComputationSkill extends Skill implements Probab
   
   private Float visibilityRegulationFactor;
   
-  public SimpleProbabilitiesComputationSkill(final Integer inumberOfCities, final Integer[][] idistances, final Integer[] iattachedCluster, final Float ipheromoneRegulationFactor, final Float ivisibilityRegulationFactor) {
+  public SimpleProbabilitiesComputationSkill(final Integer inumberOfCities, final Float[][] idistances, final Integer[] iattachedCluster, final Float ipheromoneRegulationFactor, final Float ivisibilityRegulationFactor) {
     this.numberOfCities = inumberOfCities;
     this.distances = idistances;
     this.attachedCluster = iattachedCluster;
@@ -38,8 +38,8 @@ public class SimpleProbabilitiesComputationSkill extends Skill implements Probab
       if ((!_contains)) {
         Double _get = pheromones[((currentCity) == null ? 0 : (currentCity).intValue())][i];
         double _pow = Math.pow(((_get) == null ? 0 : (double) _get) , ((this.pheromoneRegulationFactor) == null ? 0 : (this.pheromoneRegulationFactor).floatValue()));
-        Integer _get_1 = this.distances[((currentCity) == null ? 0 : (currentCity).intValue())][i];
-        double _pow_1 = Math.pow((1 / ((_get_1) == null ? 0 : (int) _get_1) ), ((this.visibilityRegulationFactor) == null ? 0 : (this.visibilityRegulationFactor).floatValue()));
+        Float _get_1 = this.distances[((currentCity) == null ? 0 : (currentCity).intValue())][i];
+        double _pow_1 = Math.pow((1 / ((_get_1) == null ? 0 : (float) _get_1) ), ((this.visibilityRegulationFactor) == null ? 0 : (this.visibilityRegulationFactor).floatValue()));
         sumOfAllowedCities = (sumOfAllowedCities + 
           (_pow * _pow_1));
       }
@@ -51,8 +51,8 @@ public class SimpleProbabilitiesComputationSkill extends Skill implements Probab
         if ((!_contains)) {
           Double _get = pheromones[((currentCity) == null ? 0 : (currentCity).intValue())][i];
           double _pow = Math.pow(((_get) == null ? 0 : (double) _get) , ((this.pheromoneRegulationFactor) == null ? 0 : (this.pheromoneRegulationFactor).floatValue()));
-          Integer _get_1 = this.distances[((currentCity) == null ? 0 : (currentCity).intValue())][i];
-          double _pow_1 = Math.pow((1 / ((_get_1) == null ? 0 : (int) _get_1) ), ((this.visibilityRegulationFactor) == null ? 0 : (this.visibilityRegulationFactor).floatValue()));
+          Float _get_1 = this.distances[((currentCity) == null ? 0 : (currentCity).intValue())][i];
+          double _pow_1 = Math.pow((1 / ((_get_1) == null ? 0 : (float) _get_1) ), ((this.visibilityRegulationFactor) == null ? 0 : (this.visibilityRegulationFactor).floatValue()));
           probability = ((_pow * _pow_1) / sumOfAllowedCities);
         }
         probabilities.add(Float.valueOf((float) probability));

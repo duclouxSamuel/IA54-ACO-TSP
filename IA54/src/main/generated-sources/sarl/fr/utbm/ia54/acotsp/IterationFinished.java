@@ -15,9 +15,9 @@ import org.eclipse.xtext.xbase.lib.util.ToStringBuilder;
 public class IterationFinished extends Event {
   public ArrayList<Integer> path;
   
-  public Integer pathLength;
+  public Float pathLength;
   
-  public IterationFinished(final ArrayList<Integer> p, final Integer pl) {
+  public IterationFinished(final ArrayList<Integer> p, final Float pl) {
     this.path = p;
     this.pathLength = pl;
   }
@@ -37,8 +37,7 @@ public class IterationFinished extends Event {
       if (this.pathLength != null)
         return false;
     } else if (this.pathLength == null)
-      return false;
-    if (other.pathLength != null && other.pathLength.intValue() != this.pathLength.intValue())
+      return false;if (other.pathLength != null && Float.floatToIntBits(other.pathLength.floatValue()) != Float.floatToIntBits(this.pathLength.floatValue()))
       return false;
     return super.equals(obj);
   }
@@ -65,5 +64,5 @@ public class IterationFinished extends Event {
   }
   
   @SyntheticMember
-  private static final long serialVersionUID = -3449026555L;
+  private static final long serialVersionUID = -1767666747L;
 }

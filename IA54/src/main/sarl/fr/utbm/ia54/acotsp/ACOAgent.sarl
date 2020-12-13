@@ -31,7 +31,7 @@ agent ACOAgent {
 
 	var currentCity : Integer
 
-	var currentPathLength : Integer 
+	var currentPathLength : Float 
 
 	var visitedCities : ArrayList<Integer>
 
@@ -71,7 +71,7 @@ agent ACOAgent {
 	def buildPath() : void {
 		visitedCities = new ArrayList<Integer>
 		visitedClusters = new ArrayList<Integer>
-		currentPathLength = 0
+		currentPathLength = new Float(0)
 		currentCity = startingCity
 		visitedCities.add(startingCity)
 		visitedClusters.add(acoParameters.attachedCluster.get(startingCity))

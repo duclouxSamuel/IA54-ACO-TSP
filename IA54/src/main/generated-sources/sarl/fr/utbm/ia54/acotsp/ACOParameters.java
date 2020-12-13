@@ -18,7 +18,7 @@ public class ACOParameters {
   private Integer numberOfClusters;
   
   @Accessors
-  private Integer[][] distances;
+  private Float[][] distances;
   
   @Accessors
   private Float[][] positions;
@@ -41,7 +41,7 @@ public class ACOParameters {
   @Accessors
   private Integer numberOfIterations;
   
-  public ACOParameters(final Integer[][] idistances, final Float[][] ipositions, final Integer[] iattachedCluster, final Float ipheromoneEvaporationFactor, final Float ipheromoneRegulationFactor, final Float ivisibilityRegulationFactor, final Integer inunberOfAnts, final Integer inumberOfIterations, final Integer inumberOfCities, final Integer inumberOfClusters) {
+  public ACOParameters(final Float[][] idistances, final Float[][] ipositions, final Integer[] iattachedCluster, final Float ipheromoneEvaporationFactor, final Float ipheromoneRegulationFactor, final Float ivisibilityRegulationFactor, final Integer inunberOfAnts, final Integer inumberOfIterations, final Integer inumberOfCities, final Integer inumberOfClusters) {
     this.numberOfCities = inumberOfCities;
     this.numberOfClusters = inumberOfClusters;
     this.distances = idistances;
@@ -149,11 +149,11 @@ public class ACOParameters {
   }
   
   @Pure
-  public Integer[][] getDistances() {
+  public Float[][] getDistances() {
     return this.distances;
   }
   
-  public void setDistances(final Integer[][] distances) {
+  public void setDistances(final Float[][] distances) {
     this.distances = distances;
   }
   
