@@ -23,11 +23,9 @@ import io.sarl.lang.core.BuiltinCapacitiesProvider;
 import io.sarl.lang.core.DynamicSkillProvider;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
 import javax.inject.Inject;
-import org.eclipse.xtext.xbase.lib.Conversions;
 import org.eclipse.xtext.xbase.lib.Extension;
 import org.eclipse.xtext.xbase.lib.IterableExtensions;
 import org.eclipse.xtext.xbase.lib.Pure;
@@ -51,9 +49,11 @@ public class ACOManager extends Agent {
   
   private Float currentBestPathLength;
   
-  private Double[][] pheromones;
+  private ArrayList<ArrayList<Double>> pheromones = new ArrayList<ArrayList<Double>>();
   
   private Integer numberOfIterationsDone;
+  
+  private ArrayList<UUID> acoAgentsID;
   
   private void $behaviorUnit$Initialize$0(final Initialize occurrence) {
     Logging _$CAPACITY_USE$IO_SARL_CORE_LOGGING$CALLER = this.$CAPACITY_USE$IO_SARL_CORE_LOGGING$CALLER();
@@ -66,9 +66,20 @@ public class ACOManager extends Agent {
   }
   
   private void $behaviorUnit$NewOptimization$2(final NewOptimization occurrence) {
+    Logging _$CAPACITY_USE$IO_SARL_CORE_LOGGING$CALLER = this.$CAPACITY_USE$IO_SARL_CORE_LOGGING$CALLER();
+    _$CAPACITY_USE$IO_SARL_CORE_LOGGING$CALLER.info("J\'ai recu l\'ordre de nouvelle optim");
     this.acoParameters = occurrence.acoParameters;
+    ArrayList<UUID> _arrayList = new ArrayList<UUID>();
+    this.acoAgentsID = _arrayList;
+    this.numberOfIterationsDone = Integer.valueOf(0);
+    Float _float = new Float(0);
+    this.currentBestPathLength = _float;
+    ArrayList<ArrayList<Integer>> _arrayList_1 = new ArrayList<ArrayList<Integer>>();
+    this.paths = _arrayList_1;
+    ArrayList<Float> _arrayList_2 = new ArrayList<Float>();
+    this.pathsLength = _arrayList_2;
+    this.initializePheromones(Double.valueOf(0d));
     this.launchACOAgents();
-    this.launchIterations();
   }
   
   private void $behaviorUnit$IterationFinished$3(final IterationFinished occurrence) {
@@ -90,10 +101,11 @@ public class ACOManager extends Agent {
         OptimizationFinished _optimizationFinished = new OptimizationFinished(this.pheromones, this.currentBestPath, this.currentBestPathLength);
         _$CAPACITY_USE$IO_SARL_CORE_DEFAULTCONTEXTINTERACTIONS$CALLER.emit(_optimizationFinished);
       } else {
-        InnerContextAccess _$CAPACITY_USE$IO_SARL_CORE_INNERCONTEXTACCESS$CALLER = this.$CAPACITY_USE$IO_SARL_CORE_INNERCONTEXTACCESS$CALLER();
-        NewIteration _newIteration = new NewIteration(this.pheromones);
-        _$CAPACITY_USE$IO_SARL_CORE_INNERCONTEXTACCESS$CALLER.getInnerContext().getDefaultSpace().emit(this.getID(), _newIteration, null);
+        this.launchACOAgents();
       }
+      Logging _$CAPACITY_USE$IO_SARL_CORE_LOGGING$CALLER = this.$CAPACITY_USE$IO_SARL_CORE_LOGGING$CALLER();
+      String _string = this.currentBestPath.toString();
+      _$CAPACITY_USE$IO_SARL_CORE_LOGGING$CALLER.info(((((("Itération :" + this.numberOfIterationsDone) + "meilleur chemin") + this.currentBestPathLength) + " parcours") + _string));
     }
   }
   
@@ -101,59 +113,61 @@ public class ACOManager extends Agent {
     for (int i = 0; (i < this.acoParameters.getNunberOfAnts().doubleValue()); i++) {
       {
         final UUID childID = UUID.randomUUID();
-        Logging _$CAPACITY_USE$IO_SARL_CORE_LOGGING$CALLER = this.$CAPACITY_USE$IO_SARL_CORE_LOGGING$CALLER();
-        _$CAPACITY_USE$IO_SARL_CORE_LOGGING$CALLER.info(("Spawning new ACOAgent on City :" + Integer.valueOf(i)));
         Lifecycle _$CAPACITY_USE$IO_SARL_CORE_LIFECYCLE$CALLER = this.$CAPACITY_USE$IO_SARL_CORE_LIFECYCLE$CALLER();
         InnerContextAccess _$CAPACITY_USE$IO_SARL_CORE_INNERCONTEXTACCESS$CALLER = this.$CAPACITY_USE$IO_SARL_CORE_INNERCONTEXTACCESS$CALLER();
-        _$CAPACITY_USE$IO_SARL_CORE_LIFECYCLE$CALLER.spawnInContextWithID(ACOAgent.class, childID, _$CAPACITY_USE$IO_SARL_CORE_INNERCONTEXTACCESS$CALLER.getInnerContext(), this.myUUID, Integer.valueOf(i), this.acoParameters);
+        _$CAPACITY_USE$IO_SARL_CORE_LIFECYCLE$CALLER.spawnInContextWithID(ACOAgent.class, childID, _$CAPACITY_USE$IO_SARL_CORE_INNERCONTEXTACCESS$CALLER.getInnerContext(), this.myUUID, Integer.valueOf(i), this.acoParameters, this.pheromones);
+        this.acoAgentsID.add(childID);
       }
     }
   }
   
   protected void launchIterations() {
-    this.numberOfIterationsDone = Integer.valueOf(0);
-    Float _float = new Float(0);
-    this.currentBestPathLength = _float;
-    this.initializePheromones(Double.valueOf(0d));
-    ArrayList<ArrayList<Integer>> _arrayList = new ArrayList<ArrayList<Integer>>();
-    this.paths = _arrayList;
-    ArrayList<Float> _arrayList_1 = new ArrayList<Float>();
-    this.pathsLength = _arrayList_1;
-    InnerContextAccess _$CAPACITY_USE$IO_SARL_CORE_INNERCONTEXTACCESS$CALLER = this.$CAPACITY_USE$IO_SARL_CORE_INNERCONTEXTACCESS$CALLER();
-    NewIteration _newIteration = new NewIteration(this.pheromones);
-    _$CAPACITY_USE$IO_SARL_CORE_INNERCONTEXTACCESS$CALLER.getInnerContext().getDefaultSpace().emit(this.getID(), _newIteration, null);
+    synchronized (this.acoAgentsID) {
+      while ((this.acoAgentsID.size() < this.acoParameters.getNunberOfAnts().doubleValue())) {
+        Logging _$CAPACITY_USE$IO_SARL_CORE_LOGGING$CALLER = this.$CAPACITY_USE$IO_SARL_CORE_LOGGING$CALLER();
+        _$CAPACITY_USE$IO_SARL_CORE_LOGGING$CALLER.info(Integer.valueOf(this.acoAgentsID.size()));
+      }
+      this.numberOfIterationsDone = Integer.valueOf(0);
+      Float _float = new Float(0);
+      this.currentBestPathLength = _float;
+      this.initializePheromones(Double.valueOf(0d));
+      ArrayList<ArrayList<Integer>> _arrayList = new ArrayList<ArrayList<Integer>>();
+      this.paths = _arrayList;
+      ArrayList<Float> _arrayList_1 = new ArrayList<Float>();
+      this.pathsLength = _arrayList_1;
+      InnerContextAccess _$CAPACITY_USE$IO_SARL_CORE_INNERCONTEXTACCESS$CALLER = this.$CAPACITY_USE$IO_SARL_CORE_INNERCONTEXTACCESS$CALLER();
+      NewIteration _newIteration = new NewIteration(this.pheromones);
+      _$CAPACITY_USE$IO_SARL_CORE_INNERCONTEXTACCESS$CALLER.getInnerContext().getDefaultSpace().emit(this.myUUID, _newIteration, null);
+    }
   }
   
   protected void initializePheromones(final Double initialPheromoneValue) {
     for (int i = 0; (i < this.acoParameters.getNumberOfCities().doubleValue()); i++) {
       {
-        Double[] temp = null;
+        ArrayList<Double> temp = new ArrayList<Double>();
         for (int j = 0; (j < this.acoParameters.getNumberOfCities().doubleValue()); j++) {
-          final Double[] _converted_temp = (Double[])temp;
-          ((List<Double>)Conversions.doWrapArray(_converted_temp)).add(initialPheromoneValue);
+          temp.add(initialPheromoneValue);
         }
-        ((List<Double[]>)Conversions.doWrapArray(this.pheromones)).add(temp);
+        this.pheromones.add(temp);
       }
     }
   }
   
-  protected Double[][] updatePheromones() {
-    Double[][] newPheromones = null;
+  protected ArrayList<ArrayList<Double>> updatePheromones() {
+    ArrayList<ArrayList<Double>> newPheromones = new ArrayList<ArrayList<Double>>();
     double sumOfpheromoneDelta = this.pheromoneDeltaComputation();
     for (int i = 0; (i < this.acoParameters.getNumberOfCities().doubleValue()); i++) {
       {
-        Double[] temp = null;
+        ArrayList<Double> temp = new ArrayList<Double>();
         for (int j = 0; (j < this.acoParameters.getNumberOfCities().doubleValue()); j++) {
           {
             Float _pheromoneEvaporationFactor = this.acoParameters.getPheromoneEvaporationFactor();
-            Double _get = this.pheromones[i][j];
+            Double _get = this.pheromones.get(i).get(j);
             double newValue = ((((_pheromoneEvaporationFactor) == null ? 0 : (_pheromoneEvaporationFactor).floatValue()) * ((_get) == null ? 0 : (_get).doubleValue())) + sumOfpheromoneDelta);
-            final Double[] _converted_temp = (Double[])temp;
-            ((List<Double>)Conversions.doWrapArray(_converted_temp)).add(Double.valueOf(newValue));
+            temp.add(Double.valueOf(newValue));
           }
         }
-        final Double[][] _converted_newPheromones = (Double[][])newPheromones;
-        ((List<Double[]>)Conversions.doWrapArray(_converted_newPheromones)).add(temp);
+        newPheromones.add(temp);
       }
     }
     return newPheromones;

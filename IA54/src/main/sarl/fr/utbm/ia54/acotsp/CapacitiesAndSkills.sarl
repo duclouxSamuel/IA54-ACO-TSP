@@ -12,22 +12,21 @@ import java.util.ArrayList
 capacity ProbabilitiesComputation {
 	def probabilitiesComputation(currentCity : Integer, probabilities : ArrayList<Float>,
 		visitedCities : ArrayList<Integer>, visitedClusterss : ArrayList<Integer>,
-		pheromones : Double[][]) : ArrayList<Float>
+		pheromones : ArrayList<ArrayList<Double>>) : ArrayList<Float>
 }
 
 @SuppressWarnings("potential_field_synchronization_problem")
 skill SimpleProbabilitiesComputationSkill implements ProbabilitiesComputation {
-
 	var numberOfCities : Integer
-	var distances : Float[][]
-	var attachedCluster : Integer[]
+	var distances : ArrayList<ArrayList<Float>>
+	var attachedCluster : ArrayList<Integer>
 	var pheromoneRegulationFactor : Float
 	var visibilityRegulationFactor : Float
 
 	new (
 		inumberOfCities : Integer,
-		idistances : Float[][],
-		iattachedCluster : Integer[],
+		idistances : ArrayList<ArrayList<Float>>,
+		iattachedCluster : ArrayList<Integer>,
 		ipheromoneRegulationFactor : Float,
 		ivisibilityRegulationFactor : Float
 	) {
@@ -40,7 +39,7 @@ skill SimpleProbabilitiesComputationSkill implements ProbabilitiesComputation {
 
 	def probabilitiesComputation(currentCity : Integer, probabilities : ArrayList<Float>,
 		visitedCities : ArrayList<Integer>, visitedClusters : ArrayList<Integer>,
-		pheromones : Double[][]) : ArrayList<Float> {
+		pheromones : ArrayList<ArrayList<Double>>) : ArrayList<Float> {
 		var sumOfAllowedCities = 0d
 
 		for (var i = 0; i < numberOfCities; i++) {
@@ -67,15 +66,15 @@ skill SimpleProbabilitiesComputationSkill implements ProbabilitiesComputation {
 @SuppressWarnings("potential_field_synchronization_problem")
 skill ProbabilitiesComputationWithGroupInfluenceSkill implements ProbabilitiesComputation {
 	var numberOfCities : Integer
-	var distances : Float[][]
-	var attachedCluster : Integer[]
+	var distances : ArrayList<ArrayList<Float>>
+	var attachedCluster : ArrayList<Integer>
 	var pheromoneRegulationFactor : Float
 	var visibilityRegulationFactor : Float
 
 	new (
 		inumberOfCities : Integer,
-		idistances : Float[][],
-		iattachedCluster : Integer[],
+		idistances : ArrayList<ArrayList<Float>>,
+		iattachedCluster : ArrayList<Integer>,
 		ipheromoneRegulationFactor : Float,
 		ivisibilityRegulationFactor : Float
 	) {
@@ -88,7 +87,7 @@ skill ProbabilitiesComputationWithGroupInfluenceSkill implements ProbabilitiesCo
 
 	def probabilitiesComputation(currentCity : Integer, probabilities : ArrayList<Float>,
 		visitedCities : ArrayList<Integer>, visitedClusters : ArrayList<Integer>,
-		pheromones : Double[][]) : ArrayList<Float> {
+		pheromones : ArrayList<ArrayList<Double>>) : ArrayList<Float> {
 		var sumOfAllowedCities = 0d
 		var sumOfAllowedCitiesWithGroupInfluence = 0d
 		var factorOfAllowedCitiesGroup : ArrayList<Double> = new ArrayList<Double>

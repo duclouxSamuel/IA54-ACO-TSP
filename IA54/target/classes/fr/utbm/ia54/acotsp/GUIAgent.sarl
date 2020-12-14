@@ -8,6 +8,7 @@ import io.sarl.core.Initialize
 import io.sarl.core.Logging
 import io.sarl.core.DefaultContextInteractions
 import java.io.File
+import java.util.ArrayList
 
 /** 
  * @author Omen
@@ -21,13 +22,24 @@ agent GUIAgent {
 		// You should put all the initialization statements in this block of code.
 		info("The agent was started.")
 		var gtsp = new Gtsp(new File('C:/Users/yaben/Documents/UTBM/GI05/IA54/Projet/Test GTSP/3burma14.txt'))
-		for (elt : gtsp.node_dist) {
-			info(elt.toString)
-		}
-		info(gtsp.dimension)
-		info(gtsp.groupDimension)
-		info(gtsp.group_list.toString)
-		
+		var pheromoneEvaporationFactor = 1f
+		var pheromoneRegulationFactor = 1f
+		var visibilityRegulationFactor = 1f
+		var nunberOfAnts = gtsp.dimension
+		var numberOfIterations = 50
+		var acoParameters = new ACOParameters(
+			gtsp.dimension,
+			gtsp.groupDimension,
+			convertToFloatArrayList(gtsp.node_dist),
+			convertToFloatArrayList(gtsp.node_coord_section),
+			convertToIntegerArrayList(gtsp.group_list),
+			pheromoneEvaporationFactor,
+			pheromoneRegulationFactor,
+			visibilityRegulationFactor,
+			nunberOfAnts,
+			numberOfIterations
+		)
+		emit(new NewOptimization(acoParameters))
 	}
 
 	on Destroy {
@@ -38,6 +50,26 @@ agent GUIAgent {
 
 	on OptimizationFinished {
 		new GuiRepaint(occurrence.pheromones, occurrence.bestPath, occurrence.bestPathLength).emit
+	}
+
+	def convertToFloatArrayList(array : float[][]) : ArrayList<ArrayList<Float>> {
+		var response = new ArrayList<ArrayList<Float>>
+		for (var i = 0; i < array.length; i++) {
+			var temp = new ArrayList<Float>
+			for (var j = 0; j < array.get(i).length; j++) {
+				temp.add(array.get(i).get(j))
+			}
+			response.add(temp)
+		}
+		return response
+	}
+
+	def convertToIntegerArrayList(array : int[]) : ArrayList<Integer> {
+		var response = new ArrayList<Integer>
+		for (var i = 0; i < array.length; i++) {
+			response.add(array.get(i))
+		}
+		return response
 	}
 
 }

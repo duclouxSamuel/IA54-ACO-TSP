@@ -3,6 +3,7 @@ package fr.utbm.ia54.acotsp;
 import io.sarl.lang.annotation.SarlElementType;
 import io.sarl.lang.annotation.SarlSpecification;
 import io.sarl.lang.annotation.SyntheticMember;
+import java.util.ArrayList;
 import java.util.Objects;
 import org.eclipse.xtend.lib.annotations.Accessors;
 import org.eclipse.xtext.xbase.lib.Pure;
@@ -18,13 +19,13 @@ public class ACOParameters {
   private Integer numberOfClusters;
   
   @Accessors
-  private Float[][] distances;
+  private ArrayList<ArrayList<Float>> distances;
   
   @Accessors
-  private Float[][] positions;
+  private ArrayList<ArrayList<Float>> positions;
   
   @Accessors
-  private Integer[] attachedCluster;
+  private ArrayList<Integer> attachedCluster;
   
   @Accessors
   private Float pheromoneEvaporationFactor;
@@ -41,7 +42,7 @@ public class ACOParameters {
   @Accessors
   private Integer numberOfIterations;
   
-  public ACOParameters(final Float[][] idistances, final Float[][] ipositions, final Integer[] iattachedCluster, final Float ipheromoneEvaporationFactor, final Float ipheromoneRegulationFactor, final Float ivisibilityRegulationFactor, final Integer inunberOfAnts, final Integer inumberOfIterations, final Integer inumberOfCities, final Integer inumberOfClusters) {
+  public ACOParameters(final Integer inumberOfCities, final Integer inumberOfClusters, final ArrayList<ArrayList<Float>> idistances, final ArrayList<ArrayList<Float>> ipositions, final ArrayList<Integer> iattachedCluster, final Float ipheromoneEvaporationFactor, final Float ipheromoneRegulationFactor, final Float ivisibilityRegulationFactor, final Integer inunberOfAnts, final Integer inumberOfIterations) {
     this.numberOfCities = inumberOfCities;
     this.numberOfClusters = inumberOfClusters;
     this.distances = idistances;
@@ -52,6 +53,19 @@ public class ACOParameters {
     this.visibilityRegulationFactor = ivisibilityRegulationFactor;
     this.nunberOfAnts = inunberOfAnts;
     this.numberOfIterations = inumberOfIterations;
+  }
+  
+  public ACOParameters(final ACOParameters acoParameters) {
+    this.numberOfCities = acoParameters.numberOfCities;
+    this.numberOfClusters = acoParameters.numberOfClusters;
+    this.distances = acoParameters.distances;
+    this.positions = acoParameters.positions;
+    this.attachedCluster = acoParameters.attachedCluster;
+    this.pheromoneEvaporationFactor = acoParameters.pheromoneEvaporationFactor;
+    this.pheromoneRegulationFactor = acoParameters.pheromoneRegulationFactor;
+    this.visibilityRegulationFactor = acoParameters.visibilityRegulationFactor;
+    this.nunberOfAnts = acoParameters.nunberOfAnts;
+    this.numberOfIterations = acoParameters.numberOfIterations;
   }
   
   @Override
@@ -149,29 +163,29 @@ public class ACOParameters {
   }
   
   @Pure
-  public Float[][] getDistances() {
+  public ArrayList<ArrayList<Float>> getDistances() {
     return this.distances;
   }
   
-  public void setDistances(final Float[][] distances) {
+  public void setDistances(final ArrayList<ArrayList<Float>> distances) {
     this.distances = distances;
   }
   
   @Pure
-  public Float[][] getPositions() {
+  public ArrayList<ArrayList<Float>> getPositions() {
     return this.positions;
   }
   
-  public void setPositions(final Float[][] positions) {
+  public void setPositions(final ArrayList<ArrayList<Float>> positions) {
     this.positions = positions;
   }
   
   @Pure
-  public Integer[] getAttachedCluster() {
+  public ArrayList<Integer> getAttachedCluster() {
     return this.attachedCluster;
   }
   
-  public void setAttachedCluster(final Integer[] attachedCluster) {
+  public void setAttachedCluster(final ArrayList<Integer> attachedCluster) {
     this.attachedCluster = attachedCluster;
   }
   

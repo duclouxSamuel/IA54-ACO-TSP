@@ -16,18 +16,21 @@ import io.sarl.core.ParticipantJoined
 import io.sarl.core.ParticipantLeft
 import io.sarl.core.SpaceCreated
 import io.sarl.core.SpaceDestroyed
+import io.sarl.core.Lifecycle
 
 /** 
  * @author Omen
  * 
  */
 agent BootAgent {
-	uses Logging
+	uses Logging, Lifecycle
 
 	on Initialize {
 		// Event trigger before the agent begin to live or to be used.
 		// You should put all the initialization statements in this block of code.
 		info("The agent was started.")
+		spawn(ACOManager)
+		spawn(GUIAgent)
 	}
 
 	on Destroy {

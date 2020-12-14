@@ -6,6 +6,7 @@ package fr.utbm.ia54.acotsp
 import org.eclipse.xtend.lib.annotations.Accessors
 import java.util.ArrayList
 
+
 /** 
  * @author yaben
  * 
@@ -19,9 +20,9 @@ event NewOptimization {
 }
 
 event NewIteration {
-	var pheromones : Double[][]
+	var pheromones : ArrayList<ArrayList<Double>>
 
-	new(p : Double[][]) {
+	new(p : ArrayList<ArrayList<Double>>) {
 		pheromones = p
 	}
 }
@@ -38,11 +39,11 @@ event IterationFinished {
 }
 
 event OptimizationFinished {
-	var pheromones : Double[][]
+	var pheromones : ArrayList<ArrayList<Double>>
 	var bestPath : ArrayList<Integer>
 	var bestPathLength : Float
-	
-	new(p : Double[][], bstPath : ArrayList<Integer>, bstPathLength: Float) {
+
+	new(p : ArrayList<ArrayList<Double>>, bstPath : ArrayList<Integer>, bstPathLength : Float) {
 		pheromones = p
 		bestPath = bstPath
 		bestPathLength = bstPathLength
@@ -50,17 +51,16 @@ event OptimizationFinished {
 }
 
 event GuiRepaint {
-	var pheromones : Double[][]
+	var pheromones : ArrayList<ArrayList<Double>>
 	var bestPath : ArrayList<Integer>
 	var bestPathLength : Float
 
-	new(p : Double[][], bstPath : ArrayList<Integer>, bstPathLength : Float) {
+	new(p : ArrayList<ArrayList<Double>>, bstPath : ArrayList<Integer>, bstPathLength : Float) {
 		pheromones = p
 		bestPath = bstPath
 		bestPathLength = bstPathLength
 	}
 }
-
 
 class ACOParameters {
 
@@ -74,15 +74,15 @@ class ACOParameters {
 
 	// Matrice des distances entre les villes
 	@Accessors
-	var distances : Float[][]
+	var distances : ArrayList<ArrayList<Float>>
 
 	// Matrice des positions des villes
 	@Accessors
-	var positions : Float[][]
+	var positions : ArrayList<ArrayList<Float>>
 
 	// Liste de l'appartenance des villes aux clusters
 	@Accessors
-	var attachedCluster : Integer[]
+	var attachedCluster : ArrayList<Integer>
 
 	// Facteur d'évaporation des phéromones
 	@Accessors
@@ -103,12 +103,11 @@ class ACOParameters {
 	// Nombre d'itérations réalisées lors d'une optimisation
 	@Accessors
 	var numberOfIterations : Integer
-	
 
-	new (idistances : Float[][], ipositions : Float[][], iattachedCluster : Integer[],
+	new (inumberOfCities : Integer, inumberOfClusters : Integer, idistances : ArrayList<ArrayList<Float>>,
+		ipositions : ArrayList<ArrayList<Float>>, iattachedCluster : ArrayList<Integer>,
 		ipheromoneEvaporationFactor : Float, ipheromoneRegulationFactor : Float, ivisibilityRegulationFactor : Float,
-		inunberOfAnts : Integer, inumberOfIterations : Integer, inumberOfCities : Integer,
-		inumberOfClusters : Integer) {
+		inunberOfAnts : Integer, inumberOfIterations : Integer) {
 		numberOfCities = inumberOfCities
 		numberOfClusters = inumberOfClusters
 		distances = idistances
@@ -119,6 +118,19 @@ class ACOParameters {
 		visibilityRegulationFactor = ivisibilityRegulationFactor
 		nunberOfAnts = inunberOfAnts
 		numberOfIterations = inumberOfIterations
+	}
+
+	new (acoParameters : ACOParameters) {
+		numberOfCities = acoParameters.numberOfCities
+		numberOfClusters = acoParameters.numberOfClusters
+		distances = acoParameters.distances
+		positions = acoParameters.positions
+		attachedCluster = acoParameters.attachedCluster
+		pheromoneEvaporationFactor = acoParameters.pheromoneEvaporationFactor
+		pheromoneRegulationFactor = acoParameters.pheromoneRegulationFactor
+		visibilityRegulationFactor = acoParameters.visibilityRegulationFactor
+		nunberOfAnts = acoParameters.nunberOfAnts
+		numberOfIterations = acoParameters.numberOfIterations
 	}
 
 }

@@ -1,7 +1,9 @@
 package fr.utbm.ia54.acotsp;
 
+import fr.utbm.ia54.acotsp.ACOParameters;
 import fr.utbm.ia54.acotsp.Gtsp;
 import fr.utbm.ia54.acotsp.GuiRepaint;
+import fr.utbm.ia54.acotsp.NewOptimization;
 import fr.utbm.ia54.acotsp.OptimizationFinished;
 import io.sarl.core.DefaultContextInteractions;
 import io.sarl.core.Destroy;
@@ -17,11 +19,10 @@ import io.sarl.lang.core.AtomicSkillReference;
 import io.sarl.lang.core.BuiltinCapacitiesProvider;
 import io.sarl.lang.core.DynamicSkillProvider;
 import java.io.File;
+import java.util.ArrayList;
 import java.util.Collection;
-import java.util.List;
 import java.util.UUID;
 import javax.inject.Inject;
-import org.eclipse.xtext.xbase.lib.Conversions;
 import org.eclipse.xtext.xbase.lib.Exceptions;
 import org.eclipse.xtext.xbase.lib.Extension;
 import org.eclipse.xtext.xbase.lib.Pure;
@@ -39,17 +40,20 @@ public class GUIAgent extends Agent {
       _$CAPACITY_USE$IO_SARL_CORE_LOGGING$CALLER.info("The agent was started.");
       File _file = new File("C:/Users/yaben/Documents/UTBM/GI05/IA54/Projet/Test GTSP/3burma14.txt");
       Gtsp gtsp = new Gtsp(_file);
-      float[][] _node_dist = gtsp.getNode_dist();
-      for (final float[] elt : _node_dist) {
-        Logging _$CAPACITY_USE$IO_SARL_CORE_LOGGING$CALLER_1 = this.$CAPACITY_USE$IO_SARL_CORE_LOGGING$CALLER();
-        _$CAPACITY_USE$IO_SARL_CORE_LOGGING$CALLER_1.info(((List<Float>)Conversions.doWrapArray(elt)).toString());
-      }
-      Logging _$CAPACITY_USE$IO_SARL_CORE_LOGGING$CALLER_2 = this.$CAPACITY_USE$IO_SARL_CORE_LOGGING$CALLER();
-      _$CAPACITY_USE$IO_SARL_CORE_LOGGING$CALLER_2.info(Integer.valueOf(gtsp.getDimension()));
-      Logging _$CAPACITY_USE$IO_SARL_CORE_LOGGING$CALLER_3 = this.$CAPACITY_USE$IO_SARL_CORE_LOGGING$CALLER();
-      _$CAPACITY_USE$IO_SARL_CORE_LOGGING$CALLER_3.info(Integer.valueOf(gtsp.getGroupDimension()));
-      Logging _$CAPACITY_USE$IO_SARL_CORE_LOGGING$CALLER_4 = this.$CAPACITY_USE$IO_SARL_CORE_LOGGING$CALLER();
-      _$CAPACITY_USE$IO_SARL_CORE_LOGGING$CALLER_4.info(((List<Integer>)Conversions.doWrapArray(gtsp.getGroup_list())).toString());
+      float pheromoneEvaporationFactor = 1f;
+      float pheromoneRegulationFactor = 1f;
+      float visibilityRegulationFactor = 1f;
+      int nunberOfAnts = gtsp.getDimension();
+      int numberOfIterations = 50;
+      int _dimension = gtsp.getDimension();
+      int _groupDimension = gtsp.getGroupDimension();
+      ArrayList<ArrayList<Float>> _convertToFloatArrayList = this.convertToFloatArrayList(gtsp.getNode_dist());
+      ArrayList<ArrayList<Float>> _convertToFloatArrayList_1 = this.convertToFloatArrayList(gtsp.getNode_coord_section());
+      ArrayList<Integer> _convertToIntegerArrayList = this.convertToIntegerArrayList(gtsp.getGroup_list());
+      ACOParameters acoParameters = new ACOParameters(Integer.valueOf(_dimension), Integer.valueOf(_groupDimension), _convertToFloatArrayList, _convertToFloatArrayList_1, _convertToIntegerArrayList, Float.valueOf(pheromoneEvaporationFactor), Float.valueOf(pheromoneRegulationFactor), Float.valueOf(visibilityRegulationFactor), Integer.valueOf(nunberOfAnts), Integer.valueOf(numberOfIterations));
+      DefaultContextInteractions _$CAPACITY_USE$IO_SARL_CORE_DEFAULTCONTEXTINTERACTIONS$CALLER = this.$CAPACITY_USE$IO_SARL_CORE_DEFAULTCONTEXTINTERACTIONS$CALLER();
+      NewOptimization _newOptimization = new NewOptimization(acoParameters);
+      _$CAPACITY_USE$IO_SARL_CORE_DEFAULTCONTEXTINTERACTIONS$CALLER.emit(_newOptimization);
     } catch (Throwable _e) {
       throw Exceptions.sneakyThrow(_e);
     }
@@ -63,6 +67,28 @@ public class GUIAgent extends Agent {
   private void $behaviorUnit$OptimizationFinished$2(final OptimizationFinished occurrence) {
     DefaultContextInteractions _$CAPACITY_USE$IO_SARL_CORE_DEFAULTCONTEXTINTERACTIONS$CALLER = this.$CAPACITY_USE$IO_SARL_CORE_DEFAULTCONTEXTINTERACTIONS$CALLER();
     _$CAPACITY_USE$IO_SARL_CORE_DEFAULTCONTEXTINTERACTIONS$CALLER.emit(new GuiRepaint(occurrence.pheromones, occurrence.bestPath, occurrence.bestPathLength));
+  }
+  
+  protected ArrayList<ArrayList<Float>> convertToFloatArrayList(final float[][] array) {
+    ArrayList<ArrayList<Float>> response = new ArrayList<ArrayList<Float>>();
+    for (int i = 0; (i < array.length); i++) {
+      {
+        ArrayList<Float> temp = new ArrayList<Float>();
+        for (int j = 0; (j < array[i].length); j++) {
+          temp.add(Float.valueOf(array[i][j]));
+        }
+        response.add(temp);
+      }
+    }
+    return response;
+  }
+  
+  protected ArrayList<Integer> convertToIntegerArrayList(final int[] array) {
+    ArrayList<Integer> response = new ArrayList<Integer>();
+    for (int i = 0; (i < array.length); i++) {
+      response.add(Integer.valueOf(array[i]));
+    }
+    return response;
   }
   
   @Extension

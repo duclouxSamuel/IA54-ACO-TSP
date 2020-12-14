@@ -4,6 +4,7 @@ import io.sarl.lang.annotation.SarlElementType;
 import io.sarl.lang.annotation.SarlSpecification;
 import io.sarl.lang.annotation.SyntheticMember;
 import io.sarl.lang.core.Event;
+import java.util.ArrayList;
 import org.eclipse.xtext.xbase.lib.Pure;
 import org.eclipse.xtext.xbase.lib.util.ToStringBuilder;
 
@@ -11,9 +12,9 @@ import org.eclipse.xtext.xbase.lib.util.ToStringBuilder;
 @SarlElementType(15)
 @SuppressWarnings("all")
 public class NewIteration extends Event {
-  public Double[][] pheromones;
+  public ArrayList<ArrayList<Double>> pheromones;
   
-  public NewIteration(final Double[][] p) {
+  public NewIteration(final ArrayList<ArrayList<Double>> p) {
     this.pheromones = p;
   }
   
@@ -43,5 +44,5 @@ public class NewIteration extends Event {
   }
   
   @SyntheticMember
-  private static final long serialVersionUID = 4033564245L;
+  private static final long serialVersionUID = 3424802581L;
 }

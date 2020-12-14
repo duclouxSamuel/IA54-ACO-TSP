@@ -3,7 +3,6 @@ package fr.utbm.ia54.acotsp
 /** 
  * 
  */
-
 import io.sarl.core.DefaultContextInteractions
 import io.sarl.core.Destroy
 import io.sarl.core.Initialize
@@ -33,9 +32,11 @@ agent ACOManager {
 
 	var currentBestPathLength : Float
 
-	var pheromones : Double[][]
+	var pheromones = new ArrayList<ArrayList<Double>>
 
 	var numberOfIterationsDone : Integer
+	
+	var acoAgentsID : ArrayList<UUID>
 
 	on Initialize {
 		// Event trigger before the agent begin to live or to be used.
@@ -50,9 +51,16 @@ agent ACOManager {
 	}
 
 	on NewOptimization {
+		info("J'ai recu l'ordre de nouvelle optim")
 		acoParameters = occurrence.acoParameters as ACOParameters
+		acoAgentsID = new ArrayList<UUID>
+		numberOfIterationsDone = 0
+		currentBestPathLength = new Float(0)
+		paths = new ArrayList<ArrayList<Integer>>
+		pathsLength = new ArrayList<Float>
+		initializePheromones(0d)
 		launchACOAgents()
-		launchIterations()
+//		launchIterations()
 	}
 
 	on IterationFinished {
@@ -67,35 +75,40 @@ agent ACOManager {
 			}
 			if (numberOfIterationsDone === acoParameters.numberOfIterations) {
 				emit(new OptimizationFinished(pheromones, currentBestPath, currentBestPathLength))
+			} else {
+				launchACOAgents()
+//				innerContext.defaultSpace.emit(myUUID, new NewIteration(pheromones))
 			}
-			else {
-				innerContext.defaultSpace.emit(ID, new NewIteration(pheromones))
-			}
+				 info("Itération :" + numberOfIterationsDone + "meilleur chemin" + currentBestPathLength + ' parcours' + currentBestPath.toString)
 		}
 	}
 
 	def launchACOAgents() {
 		for (var i = 0; i < acoParameters.nunberOfAnts; i++) {
 			val childID = UUID.randomUUID
-			info("Spawning new ACOAgent on City :" + i)
-			ACOAgent.spawnInContextWithID(childID, innerContext, myUUID, i, acoParameters)
+//			info("Spawning new ACOAgent" + childID + "on City :" + i)
+			ACOAgent.spawnInContextWithID(childID, innerContext, myUUID, i, acoParameters, pheromones)
+			acoAgentsID.add(childID)
 		}
 	}
 
 	def launchIterations() {
-		numberOfIterationsDone = 0
-		currentBestPathLength = new Float(0)
-		initializePheromones(0d)
-		paths = new ArrayList<ArrayList<Integer>>
-		pathsLength = new ArrayList<Float>
-		innerContext.defaultSpace.emit(ID, new NewIteration(pheromones))
+		synchronized(acoAgentsID) {
+			while (acoAgentsID.size < acoParameters.nunberOfAnts) {
+				info(acoAgentsID.size)
+			}
+			numberOfIterationsDone = 0
+			currentBestPathLength = new Float(0)
+			initializePheromones(0d)
+			paths = new ArrayList<ArrayList<Integer>>
+			pathsLength = new ArrayList<Float>
+			innerContext.defaultSpace.emit(myUUID, new NewIteration(pheromones))
+		}
 	}
-	
-
 
 	def initializePheromones(initialPheromoneValue : Double) {
 		for (var i = 0; i < acoParameters.numberOfCities; i++) {
-			var temp : Double[]
+			var temp = new ArrayList<Double>
 			for (var j = 0; j < acoParameters.numberOfCities; j++) {
 				temp.add(initialPheromoneValue)
 			}
@@ -104,10 +117,10 @@ agent ACOManager {
 	}
 
 	def updatePheromones() {
-		var newPheromones : Double[][]
+		var newPheromones = new ArrayList<ArrayList<Double>>
 		var sumOfpheromoneDelta = pheromoneDeltaComputation()
 		for (var i = 0; i < acoParameters.numberOfCities; i++) {
-			var temp : Double[]
+			var temp = new ArrayList<Double>
 			for (var j = 0; j < acoParameters.numberOfCities; j++) {
 				var newValue = acoParameters.pheromoneEvaporationFactor * pheromones.get(i).get(j) + sumOfpheromoneDelta
 				temp.add(newValue)

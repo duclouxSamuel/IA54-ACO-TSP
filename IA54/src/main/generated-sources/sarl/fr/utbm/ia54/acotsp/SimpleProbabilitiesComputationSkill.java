@@ -15,15 +15,15 @@ import org.eclipse.xtext.xbase.lib.Pure;
 public class SimpleProbabilitiesComputationSkill extends Skill implements ProbabilitiesComputation {
   private Integer numberOfCities;
   
-  private Float[][] distances;
+  private ArrayList<ArrayList<Float>> distances;
   
-  private Integer[] attachedCluster;
+  private ArrayList<Integer> attachedCluster;
   
   private Float pheromoneRegulationFactor;
   
   private Float visibilityRegulationFactor;
   
-  public SimpleProbabilitiesComputationSkill(final Integer inumberOfCities, final Float[][] idistances, final Integer[] iattachedCluster, final Float ipheromoneRegulationFactor, final Float ivisibilityRegulationFactor) {
+  public SimpleProbabilitiesComputationSkill(final Integer inumberOfCities, final ArrayList<ArrayList<Float>> idistances, final ArrayList<Integer> iattachedCluster, final Float ipheromoneRegulationFactor, final Float ivisibilityRegulationFactor) {
     this.numberOfCities = inumberOfCities;
     this.distances = idistances;
     this.attachedCluster = iattachedCluster;
@@ -31,15 +31,15 @@ public class SimpleProbabilitiesComputationSkill extends Skill implements Probab
     this.visibilityRegulationFactor = ivisibilityRegulationFactor;
   }
   
-  public ArrayList<Float> probabilitiesComputation(final Integer currentCity, final ArrayList<Float> probabilities, final ArrayList<Integer> visitedCities, final ArrayList<Integer> visitedClusters, final Double[][] pheromones) {
+  public ArrayList<Float> probabilitiesComputation(final Integer currentCity, final ArrayList<Float> probabilities, final ArrayList<Integer> visitedCities, final ArrayList<Integer> visitedClusters, final ArrayList<ArrayList<Double>> pheromones) {
     double sumOfAllowedCities = 0d;
     for (int i = 0; (i < this.numberOfCities.doubleValue()); i++) {
-      boolean _contains = visitedClusters.contains(this.attachedCluster[i]);
+      boolean _contains = visitedClusters.contains(this.attachedCluster.get(i));
       if ((!_contains)) {
-        Double _get = pheromones[((currentCity) == null ? 0 : (currentCity).intValue())][i];
-        double _pow = Math.pow(((_get) == null ? 0 : (double) _get) , ((this.pheromoneRegulationFactor) == null ? 0 : (this.pheromoneRegulationFactor).floatValue()));
-        Float _get_1 = this.distances[((currentCity) == null ? 0 : (currentCity).intValue())][i];
-        double _pow_1 = Math.pow((1 / ((_get_1) == null ? 0 : (float) _get_1) ), ((this.visibilityRegulationFactor) == null ? 0 : (this.visibilityRegulationFactor).floatValue()));
+        Double _get = pheromones.get(((currentCity) == null ? 0 : (currentCity).intValue())).get(i);
+        double _pow = Math.pow(((_get) == null ? 0 : (_get).doubleValue()), ((this.pheromoneRegulationFactor) == null ? 0 : (this.pheromoneRegulationFactor).floatValue()));
+        Float _get_1 = this.distances.get(((currentCity) == null ? 0 : (currentCity).intValue())).get(i);
+        double _pow_1 = Math.pow((1 / ((_get_1) == null ? 0 : (_get_1).floatValue())), ((this.visibilityRegulationFactor) == null ? 0 : (this.visibilityRegulationFactor).floatValue()));
         sumOfAllowedCities = (sumOfAllowedCities + 
           (_pow * _pow_1));
       }
@@ -47,12 +47,12 @@ public class SimpleProbabilitiesComputationSkill extends Skill implements Probab
     for (int i = 0; (i < this.numberOfCities.doubleValue()); i++) {
       {
         double probability = 0d;
-        boolean _contains = visitedClusters.contains(this.attachedCluster[i]);
+        boolean _contains = visitedClusters.contains(this.attachedCluster.get(i));
         if ((!_contains)) {
-          Double _get = pheromones[((currentCity) == null ? 0 : (currentCity).intValue())][i];
-          double _pow = Math.pow(((_get) == null ? 0 : (double) _get) , ((this.pheromoneRegulationFactor) == null ? 0 : (this.pheromoneRegulationFactor).floatValue()));
-          Float _get_1 = this.distances[((currentCity) == null ? 0 : (currentCity).intValue())][i];
-          double _pow_1 = Math.pow((1 / ((_get_1) == null ? 0 : (float) _get_1) ), ((this.visibilityRegulationFactor) == null ? 0 : (this.visibilityRegulationFactor).floatValue()));
+          Double _get = pheromones.get(((currentCity) == null ? 0 : (currentCity).intValue())).get(i);
+          double _pow = Math.pow(((_get) == null ? 0 : (_get).doubleValue()), ((this.pheromoneRegulationFactor) == null ? 0 : (this.pheromoneRegulationFactor).floatValue()));
+          Float _get_1 = this.distances.get(((currentCity) == null ? 0 : (currentCity).intValue())).get(i);
+          double _pow_1 = Math.pow((1 / ((_get_1) == null ? 0 : (_get_1).floatValue())), ((this.visibilityRegulationFactor) == null ? 0 : (this.visibilityRegulationFactor).floatValue()));
           probability = ((_pow * _pow_1) / sumOfAllowedCities);
         }
         probabilities.add(Float.valueOf((float) probability));
