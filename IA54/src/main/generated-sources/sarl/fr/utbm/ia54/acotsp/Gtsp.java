@@ -182,12 +182,11 @@ public class Gtsp {
 			line = reader.readLine();
 			if(line.equals("EOF")) {
 				break;
-			}
-			line = line.substring(1, line.length() - 1); 			
+			}		
 
 			String[] tokens = line.trim().split("\\s");
 			
-			int i = 0;
+			int i = 1;
 			while(true) {
 				if(tokens[i].equals("-")) {
 					break;
@@ -199,7 +198,7 @@ public class Gtsp {
 			clusterId++;
 		}
 		groupList = groupListTemp;
-		setGroupDimension(clusterId);
+		groupDimension = clusterId-1;
 	}
 	
 	/* Initialise la matrice des distances dans le GTSP */
