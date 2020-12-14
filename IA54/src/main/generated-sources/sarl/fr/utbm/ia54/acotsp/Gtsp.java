@@ -106,7 +106,7 @@ public class Gtsp {
 			while ((line = reader.readLine()) != null) {
 				line = line.trim();
 				
-				if (line.equals("GTSP_SET_SECTION")) {
+				if (line.equals("GTSP_SET_SECTION:")) {
 					
 					/* Load Group_list */
 					this.loadGtspSetSection(reader);

@@ -6,18 +6,28 @@ package fr.utbm.ia54.acotsp
 import io.sarl.core.Destroy
 import io.sarl.core.Initialize
 import io.sarl.core.Logging
+import io.sarl.core.DefaultContextInteractions
+import java.io.File
 
 /** 
  * @author Omen
  * 
  */
 agent GUIAgent {
-	uses Logging
+	uses Logging, DefaultContextInteractions
 
 	on Initialize {
 		// Event trigger before the agent begin to live or to be used.
 		// You should put all the initialization statements in this block of code.
 		info("The agent was started.")
+		var gtsp = new Gtsp(new File('C:/Users/yaben/Documents/UTBM/GI05/IA54/Projet/Test GTSP/3burma14.txt'))
+		for (elt : gtsp.node_dist) {
+			info(elt.toString)
+		}
+		info(gtsp.dimension)
+		info(gtsp.groupDimension)
+		info(gtsp.group_list.toString)
+		
 	}
 
 	on Destroy {
@@ -27,6 +37,7 @@ agent GUIAgent {
 	}
 
 	on OptimizationFinished {
+		new GuiRepaint(occurrence.pheromones, occurrence.bestPath, occurrence.bestPathLength).emit
 	}
 
 }

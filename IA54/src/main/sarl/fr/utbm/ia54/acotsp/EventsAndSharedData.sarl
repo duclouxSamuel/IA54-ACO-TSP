@@ -49,6 +49,19 @@ event OptimizationFinished {
 	}
 }
 
+event GuiRepaint {
+	var pheromones : Double[][]
+	var bestPath : ArrayList<Integer>
+	var bestPathLength : Float
+
+	new(p : Double[][], bstPath : ArrayList<Integer>, bstPathLength : Float) {
+		pheromones = p
+		bestPath = bstPath
+		bestPathLength = bstPathLength
+	}
+}
+
+
 class ACOParameters {
 
 	// Nombre de villes
@@ -90,6 +103,7 @@ class ACOParameters {
 	// Nombre d'itérations réalisées lors d'une optimisation
 	@Accessors
 	var numberOfIterations : Integer
+	
 
 	new (idistances : Float[][], ipositions : Float[][], iattachedCluster : Integer[],
 		ipheromoneEvaporationFactor : Float, ipheromoneRegulationFactor : Float, ivisibilityRegulationFactor : Float,

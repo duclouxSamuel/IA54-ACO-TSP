@@ -27,11 +27,11 @@ agent ACOManager {
 
 	var paths : ArrayList<ArrayList<Integer>>
 
-	var pathsLength : ArrayList<Integer>
+	var pathsLength : ArrayList<Float>
 
 	var currentBestPath : ArrayList<Integer>
 
-	var currentBestPathLength : Integer
+	var currentBestPathLength : Float
 
 	var pheromones : Double[][]
 
@@ -84,10 +84,10 @@ agent ACOManager {
 
 	def launchIterations() {
 		numberOfIterationsDone = 0
-		currentBestPathLength = 0
+		currentBestPathLength = new Float(0)
 		initializePheromones(0d)
 		paths = new ArrayList<ArrayList<Integer>>
-		pathsLength = new ArrayList<Integer>
+		pathsLength = new ArrayList<Float>
 		innerContext.defaultSpace.emit(ID, new NewIteration(pheromones))
 	}
 	

@@ -28,9 +28,9 @@ event NewIteration {
 
 event IterationFinished {
 	var path : ArrayList<Integer>
-	var pathLength : Integer
+	var pathLength : Float
 
-	new(p : ArrayList<Integer>, pl : Integer) {
+	new(p : ArrayList<Integer>, pl : Float) {
 		path = p
 		pathLength = pl
 	}
@@ -40,14 +40,27 @@ event IterationFinished {
 event OptimizationFinished {
 	var pheromones : Double[][]
 	var bestPath : ArrayList<Integer>
-	var bestPathLength : Integer
+	var bestPathLength : Float
 	
-	new(p : Double[][], bstPath : ArrayList<Integer>, bstPathLength: Integer) {
+	new(p : Double[][], bstPath : ArrayList<Integer>, bstPathLength: Float) {
 		pheromones = p
 		bestPath = bstPath
 		bestPathLength = bstPathLength
 	}
 }
+
+event GuiRepaint {
+	var pheromones : Double[][]
+	var bestPath : ArrayList<Integer>
+	var bestPathLength : Float
+
+	new(p : Double[][], bstPath : ArrayList<Integer>, bstPathLength : Float) {
+		pheromones = p
+		bestPath = bstPath
+		bestPathLength = bstPathLength
+	}
+}
+
 
 class ACOParameters {
 
@@ -61,7 +74,7 @@ class ACOParameters {
 
 	// Matrice des distances entre les villes
 	@Accessors
-	var distances : Integer[][]
+	var distances : Float[][]
 
 	// Matrice des positions des villes
 	@Accessors
@@ -90,8 +103,9 @@ class ACOParameters {
 	// Nombre d'itérations réalisées lors d'une optimisation
 	@Accessors
 	var numberOfIterations : Integer
+	
 
-	new (idistances : Integer[][], ipositions : Float[][], iattachedCluster : Integer[],
+	new (idistances : Float[][], ipositions : Float[][], iattachedCluster : Integer[],
 		ipheromoneEvaporationFactor : Float, ipheromoneRegulationFactor : Float, ivisibilityRegulationFactor : Float,
 		inunberOfAnts : Integer, inumberOfIterations : Integer, inumberOfCities : Integer,
 		inumberOfClusters : Integer) {
