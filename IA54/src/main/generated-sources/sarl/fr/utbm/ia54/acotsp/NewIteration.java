@@ -12,9 +12,9 @@ import org.eclipse.xtext.xbase.lib.util.ToStringBuilder;
 @SarlElementType(15)
 @SuppressWarnings("all")
 public class NewIteration extends Event {
-  public ArrayList<ArrayList<Double>> pheromones;
+  public ArrayList<ArrayList<Float>> pheromones;
   
-  public NewIteration(final ArrayList<ArrayList<Double>> p) {
+  public NewIteration(final ArrayList<ArrayList<Float>> p) {
     this.pheromones = p;
   }
   
@@ -44,5 +44,5 @@ public class NewIteration extends Event {
   }
   
   @SyntheticMember
-  private static final long serialVersionUID = 3424802581L;
+  private static final long serialVersionUID = -669703947L;
 }

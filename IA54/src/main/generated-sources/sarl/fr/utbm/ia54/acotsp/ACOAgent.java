@@ -1,6 +1,7 @@
 package fr.utbm.ia54.acotsp;
 
 import fr.utbm.ia54.acotsp.ACOParameters;
+import fr.utbm.ia54.acotsp.AgentIsReady;
 import fr.utbm.ia54.acotsp.IterationFinished;
 import fr.utbm.ia54.acotsp.NewIteration;
 import fr.utbm.ia54.acotsp.OptimizationFinished;
@@ -22,6 +23,7 @@ import io.sarl.lang.core.BuiltinCapacitiesProvider;
 import io.sarl.lang.core.DynamicSkillProvider;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
@@ -38,13 +40,11 @@ import org.eclipse.xtext.xbase.lib.Pure;
 @SarlSpecification("0.11")
 @SarlElementType(19)
 public class ACOAgent extends Agent {
-  private UUID environment;
-  
   private Integer startingCity;
   
   private ACOParameters acoParameters;
   
-  private ArrayList<ArrayList<Double>> pheromones;
+  private ArrayList<ArrayList<Float>> pheromones;
   
   private Integer currentCity;
   
@@ -56,25 +56,18 @@ public class ACOAgent extends Agent {
   
   private void $behaviorUnit$Initialize$0(final Initialize occurrence) {
     int _size = ((List<Object>)Conversions.doWrapArray(occurrence.parameters)).size();
-    if ((_size > 3)) {
-      Object _get = occurrence.parameters[0];
-      if ((_get instanceof UUID)) {
-        Object _get_1 = occurrence.parameters[0];
-        this.environment = ((UUID) _get_1);
+    if ((_size > 2)) {
+      Object _get = occurrence.parameters[1];
+      if ((_get instanceof Integer)) {
+        Object _get_1 = occurrence.parameters[1];
+        this.startingCity = ((Integer) _get_1);
       }
-      Object _get_2 = occurrence.parameters[1];
-      if ((_get_2 instanceof Integer)) {
-        Object _get_3 = occurrence.parameters[1];
-        this.startingCity = ((Integer) _get_3);
-      }
-      Object _get_4 = occurrence.parameters[2];
-      if ((_get_4 instanceof ACOParameters)) {
-        Object _get_5 = occurrence.parameters[2];
-        ACOParameters _aCOParameters = new ACOParameters(((ACOParameters) _get_5));
+      Object _get_2 = occurrence.parameters[2];
+      if ((_get_2 instanceof ACOParameters)) {
+        Object _get_3 = occurrence.parameters[2];
+        ACOParameters _aCOParameters = new ACOParameters(((ACOParameters) _get_3));
         this.acoParameters = _aCOParameters;
       }
-      Object _get_6 = occurrence.parameters[3];
-      this.pheromones = ((ArrayList<ArrayList<Double>>) _get_6);
     }
     Integer _numberOfCities = this.acoParameters.getNumberOfCities();
     ArrayList<ArrayList<Float>> _distances = this.acoParameters.getDistances();
@@ -84,11 +77,12 @@ public class ACOAgent extends Agent {
     ProbabilitiesComputationWithGroupInfluenceSkill _probabilitiesComputationWithGroupInfluenceSkill = new ProbabilitiesComputationWithGroupInfluenceSkill(_numberOfCities, _distances, _attachedCluster, _pheromoneRegulationFactor, _visibilityRegulationFactor);
     this.<ProbabilitiesComputationWithGroupInfluenceSkill>setSkill(_probabilitiesComputationWithGroupInfluenceSkill, ProbabilitiesComputation.class);
     Logging _$CAPACITY_USE$IO_SARL_CORE_LOGGING$CALLER = this.$CAPACITY_USE$IO_SARL_CORE_LOGGING$CALLER();
-    _$CAPACITY_USE$IO_SARL_CORE_LOGGING$CALLER.info("The agent was started.");
-    this.buildPath();
+    _$CAPACITY_USE$IO_SARL_CORE_LOGGING$CALLER.setLoggingName(("ACOAgent starting at " + this.startingCity));
+    Logging _$CAPACITY_USE$IO_SARL_CORE_LOGGING$CALLER_1 = this.$CAPACITY_USE$IO_SARL_CORE_LOGGING$CALLER();
+    _$CAPACITY_USE$IO_SARL_CORE_LOGGING$CALLER_1.info("The agent was started.");
     DefaultContextInteractions _$CAPACITY_USE$IO_SARL_CORE_DEFAULTCONTEXTINTERACTIONS$CALLER = this.$CAPACITY_USE$IO_SARL_CORE_DEFAULTCONTEXTINTERACTIONS$CALLER();
-    IterationFinished _iterationFinished = new IterationFinished(this.visitedCities, this.currentPathLength);
-    _$CAPACITY_USE$IO_SARL_CORE_DEFAULTCONTEXTINTERACTIONS$CALLER.emit(_iterationFinished);
+    AgentIsReady _agentIsReady = new AgentIsReady();
+    _$CAPACITY_USE$IO_SARL_CORE_DEFAULTCONTEXTINTERACTIONS$CALLER.emit(_agentIsReady);
   }
   
   private void $behaviorUnit$NewIteration$1(final NewIteration occurrence) {
@@ -97,8 +91,6 @@ public class ACOAgent extends Agent {
     DefaultContextInteractions _$CAPACITY_USE$IO_SARL_CORE_DEFAULTCONTEXTINTERACTIONS$CALLER = this.$CAPACITY_USE$IO_SARL_CORE_DEFAULTCONTEXTINTERACTIONS$CALLER();
     IterationFinished _iterationFinished = new IterationFinished(this.visitedCities, this.currentPathLength);
     _$CAPACITY_USE$IO_SARL_CORE_DEFAULTCONTEXTINTERACTIONS$CALLER.emit(_iterationFinished);
-    Lifecycle _$CAPACITY_USE$IO_SARL_CORE_LIFECYCLE$CALLER = this.$CAPACITY_USE$IO_SARL_CORE_LIFECYCLE$CALLER();
-    _$CAPACITY_USE$IO_SARL_CORE_LIFECYCLE$CALLER.killMe();
   }
   
   private void $behaviorUnit$OptimizationFinished$2(final OptimizationFinished occurrence) {
@@ -107,8 +99,6 @@ public class ACOAgent extends Agent {
   }
   
   protected void buildPath() {
-    Logging _$CAPACITY_USE$IO_SARL_CORE_LOGGING$CALLER = this.$CAPACITY_USE$IO_SARL_CORE_LOGGING$CALLER();
-    _$CAPACITY_USE$IO_SARL_CORE_LOGGING$CALLER.info(("Je build mon path en partant de : " + this.startingCity));
     ArrayList<Integer> _arrayList = new ArrayList<Integer>();
     this.visitedCities = _arrayList;
     ArrayList<Integer> _arrayList_1 = new ArrayList<Integer>();
@@ -120,18 +110,17 @@ public class ACOAgent extends Agent {
     this.visitedClusters.add(this.acoParameters.getAttachedCluster().get(((this.startingCity) == null ? 0 : (this.startingCity).intValue())));
     while ((this.visitedClusters.size() < this.acoParameters.getNumberOfClusters().doubleValue())) {
       {
-        ArrayList<Float> probabilities = new ArrayList<Float>();
+        ArrayList<Double> probabilities = new ArrayList<Double>();
         ProbabilitiesComputation _$CAPACITY_USE$FR_UTBM_IA54_ACOTSP_PROBABILITIESCOMPUTATION$CALLER = this.$CAPACITY_USE$FR_UTBM_IA54_ACOTSP_PROBABILITIESCOMPUTATION$CALLER();
         probabilities = _$CAPACITY_USE$FR_UTBM_IA54_ACOTSP_PROBABILITIESCOMPUTATION$CALLER.probabilitiesComputation(this.currentCity, probabilities, this.visitedCities, this.visitedClusters, 
           this.pheromones);
-        int nextVisitedCity = probabilities.indexOf(IterableExtensions.<Float>max(probabilities));
+        int nextVisitedCity = probabilities.indexOf(IterableExtensions.<Double>max(probabilities));
         Float _get = this.acoParameters.getDistances().get(((this.currentCity) == null ? 0 : (this.currentCity).intValue())).get(nextVisitedCity);
         this.currentPathLength = Float.valueOf((((this.currentPathLength) == null ? 0 : (this.currentPathLength).floatValue()) + ((_get) == null ? 0 : (_get).floatValue())));
         this.currentCity = Integer.valueOf(nextVisitedCity);
-        Logging _$CAPACITY_USE$IO_SARL_CORE_LOGGING$CALLER_1 = this.$CAPACITY_USE$IO_SARL_CORE_LOGGING$CALLER();
-        _$CAPACITY_USE$IO_SARL_CORE_LOGGING$CALLER_1.info(("Next city :" + Integer.valueOf(nextVisitedCity)));
         this.visitedCities.add(Integer.valueOf(nextVisitedCity));
         this.visitedClusters.add(this.acoParameters.getAttachedCluster().get(nextVisitedCity));
+        HashSet<Integer> set = new HashSet<Integer>(this.visitedCities);
       }
     }
     Float _get = this.acoParameters.getDistances().get(((this.currentCity) == null ? 0 : (this.currentCity).intValue())).get(((this.startingCity) == null ? 0 : (this.startingCity).intValue()));
@@ -242,8 +231,6 @@ public class ACOAgent extends Agent {
     if (getClass() != obj.getClass())
       return false;
     ACOAgent other = (ACOAgent) obj;
-    if (!Objects.equals(this.environment, other.environment))
-      return false;
     if (other.startingCity == null) {
       if (this.startingCity != null)
         return false;
@@ -273,7 +260,6 @@ public class ACOAgent extends Agent {
   public int hashCode() {
     int result = super.hashCode();
     final int prime = 31;
-    result = prime * result + Objects.hashCode(this.environment);
     result = prime * result + Objects.hashCode(this.startingCity);
     result = prime * result + Objects.hashCode(this.currentCity);
     result = prime * result + Objects.hashCode(this.currentPathLength);

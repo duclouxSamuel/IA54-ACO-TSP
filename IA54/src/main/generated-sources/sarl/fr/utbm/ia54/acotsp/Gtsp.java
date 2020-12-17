@@ -197,7 +197,7 @@ public class Gtsp {
 			clusterId++;
 		}
 		groupList = groupListTemp;
-		setGroupDimension(clusterId);
+		setGroupDimension(clusterId - 1);
 	}
 	
 	/* Initialise la matrice des distances dans le GTSP */

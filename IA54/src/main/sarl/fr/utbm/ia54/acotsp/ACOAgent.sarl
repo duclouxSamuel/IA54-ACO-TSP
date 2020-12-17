@@ -6,11 +6,10 @@ package fr.utbm.ia54.acotsp
 import io.sarl.core.Destroy
 import io.sarl.core.Initialize
 import io.sarl.core.Logging
-import java.util.UUID
 import java.util.ArrayList
 import io.sarl.core.DefaultContextInteractions
 import io.sarl.core.Lifecycle
-
+import java.util.HashSet
 
 /** 
  * @author Omen
@@ -22,59 +21,52 @@ agent ACOAgent {
 
 	uses ProbabilitiesComputation
 
-	var environment : UUID
-
 	var startingCity : Integer
 
 	var acoParameters : ACOParameters
 
-	var pheromones : ArrayList<ArrayList<Double>>
+	var pheromones : ArrayList<ArrayList<Float>>
 
 	var currentCity : Integer
 
-	var currentPathLength : Float 
+	var currentPathLength : Float
 
 	var visitedCities : ArrayList<Integer>
 
 	var visitedClusters : ArrayList<Integer>
 
 	on Initialize {
-		if (occurrence.parameters.size > 3) {
-			if (occurrence.parameters.get(0) instanceof UUID) {
-				environment = occurrence.parameters.get(0) as UUID
-			}
-
+		if (occurrence.parameters.size > 2) {
+			// if (occurrence.parameters.get(0) instanceof UUID) {
+			// environment = occurrence.parameters.get(0) as UUID
+			// }
 			if (occurrence.parameters.get(1) instanceof Integer) {
 				startingCity = occurrence.parameters.get(1) as Integer
-			}	
-			if (occurrence.parameters.get(2) instanceof ACOParameters) {
-				acoParameters = new ACOParameters(occurrence.parameters.get(2) as ACOParameters) 
 			}
-				pheromones = occurrence.parameters.get(3) as ArrayList<ArrayList<Double>>
-			
+			if (occurrence.parameters.get(2) instanceof ACOParameters) {
+				acoParameters = new ACOParameters(occurrence.parameters.get(2) as ACOParameters)
+			}
 		}
 		setSkill(
 			new ProbabilitiesComputationWithGroupInfluenceSkill(acoParameters.numberOfCities, acoParameters.distances,
 				acoParameters.attachedCluster, acoParameters.pheromoneRegulationFactor,
 				acoParameters.visibilityRegulationFactor), ProbabilitiesComputation)
+		loggingName = "ACOAgent starting at " + startingCity
 		info("The agent was started.")
-		buildPath()
-		emit(new IterationFinished(visitedCities, currentPathLength))
+		emit(new AgentIsReady)
 	}
 
 	on NewIteration {
 		pheromones = occurrence.pheromones
 		buildPath()
 		emit(new IterationFinished(visitedCities, currentPathLength))
-		killMe
 	}
-	
+
 	on OptimizationFinished {
 		killMe
 	}
 
 	def buildPath() : void {
-		info('Je build mon path en partant de : ' + startingCity)
 		visitedCities = new ArrayList<Integer>
 		visitedClusters = new ArrayList<Integer>
 		currentPathLength = new Float(0)
@@ -82,22 +74,32 @@ agent ACOAgent {
 		visitedCities.add(startingCity)
 		visitedClusters.add(acoParameters.attachedCluster.get(startingCity))
 		while (visitedClusters.size() < acoParameters.numberOfClusters) {
-			var probabilities = new ArrayList<Float>
+			var probabilities = new ArrayList<Double>
 			probabilities = probabilitiesComputation(currentCity, probabilities, visitedCities, visitedClusters,
 				pheromones)
+			// if (startingCity == 9)
+			// info(probabilities.toString)
 			var nextVisitedCity = probabilities.indexOf(probabilities.max())
 			currentPathLength = currentPathLength + acoParameters.distances.get(currentCity).get(nextVisitedCity)
 			currentCity = nextVisitedCity
-			info('Next city :' + nextVisitedCity)
 			visitedCities.add(nextVisitedCity)
 			visitedClusters.add(acoParameters.attachedCluster.get(nextVisitedCity))
+			var set = new HashSet<Integer>(visitedCities);
+//			if (set.size() < visitedCities.size()) {
+//				info('ALERT DUPLICATE ')
+//				info('Probabilities' + probabilities)
+//				info('Visited clusters : ' + visitedClusters)
+//				info('Visited cities : ' + visitedCities)
+//				info('Pheromones :' + pheromones)
+//			 }
+
 		}
 		currentPathLength = currentPathLength + acoParameters.distances.get(currentCity).get(startingCity)
+		// if(startingCity == 9)
+		// info('Path :' + currentPathLength + ' ' + visitedCities.toString)
 	}
 
 	on Destroy {
-		// Event trigger when the agent is destroyed from the system.
-		// You should put all the resource releasing statements in this block of code.
 		info("The agent was stopped.")
 	}
 

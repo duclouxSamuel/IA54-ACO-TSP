@@ -37,12 +37,12 @@ public class ACOParameters {
   private Float visibilityRegulationFactor;
   
   @Accessors
-  private Integer nunberOfAnts;
+  private Integer numberOfAnts;
   
   @Accessors
   private Integer numberOfIterations;
   
-  public ACOParameters(final Integer inumberOfCities, final Integer inumberOfClusters, final ArrayList<ArrayList<Float>> idistances, final ArrayList<ArrayList<Float>> ipositions, final ArrayList<Integer> iattachedCluster, final Float ipheromoneEvaporationFactor, final Float ipheromoneRegulationFactor, final Float ivisibilityRegulationFactor, final Integer inunberOfAnts, final Integer inumberOfIterations) {
+  public ACOParameters(final Integer inumberOfCities, final Integer inumberOfClusters, final ArrayList<ArrayList<Float>> idistances, final ArrayList<ArrayList<Float>> ipositions, final ArrayList<Integer> iattachedCluster, final Float ipheromoneEvaporationFactor, final Float ipheromoneRegulationFactor, final Float ivisibilityRegulationFactor, final Integer inumberOfAnts, final Integer inumberOfIterations) {
     this.numberOfCities = inumberOfCities;
     this.numberOfClusters = inumberOfClusters;
     this.distances = idistances;
@@ -51,7 +51,7 @@ public class ACOParameters {
     this.pheromoneEvaporationFactor = ipheromoneEvaporationFactor;
     this.pheromoneRegulationFactor = ipheromoneRegulationFactor;
     this.visibilityRegulationFactor = ivisibilityRegulationFactor;
-    this.nunberOfAnts = inunberOfAnts;
+    this.numberOfAnts = inumberOfAnts;
     this.numberOfIterations = inumberOfIterations;
   }
   
@@ -64,7 +64,7 @@ public class ACOParameters {
     this.pheromoneEvaporationFactor = acoParameters.pheromoneEvaporationFactor;
     this.pheromoneRegulationFactor = acoParameters.pheromoneRegulationFactor;
     this.visibilityRegulationFactor = acoParameters.visibilityRegulationFactor;
-    this.nunberOfAnts = acoParameters.nunberOfAnts;
+    this.numberOfAnts = acoParameters.numberOfAnts;
     this.numberOfIterations = acoParameters.numberOfIterations;
   }
   
@@ -111,12 +111,12 @@ public class ACOParameters {
     } else if (this.visibilityRegulationFactor == null)
       return false;if (other.visibilityRegulationFactor != null && Float.floatToIntBits(other.visibilityRegulationFactor.floatValue()) != Float.floatToIntBits(this.visibilityRegulationFactor.floatValue()))
       return false;
-    if (other.nunberOfAnts == null) {
-      if (this.nunberOfAnts != null)
+    if (other.numberOfAnts == null) {
+      if (this.numberOfAnts != null)
         return false;
-    } else if (this.nunberOfAnts == null)
+    } else if (this.numberOfAnts == null)
       return false;
-    if (other.nunberOfAnts != null && other.nunberOfAnts.intValue() != this.nunberOfAnts.intValue())
+    if (other.numberOfAnts != null && other.numberOfAnts.intValue() != this.numberOfAnts.intValue())
       return false;
     if (other.numberOfIterations == null) {
       if (this.numberOfIterations != null)
@@ -139,7 +139,7 @@ public class ACOParameters {
     result = prime * result + Objects.hashCode(this.pheromoneEvaporationFactor);
     result = prime * result + Objects.hashCode(this.pheromoneRegulationFactor);
     result = prime * result + Objects.hashCode(this.visibilityRegulationFactor);
-    result = prime * result + Objects.hashCode(this.nunberOfAnts);
+    result = prime * result + Objects.hashCode(this.numberOfAnts);
     result = prime * result + Objects.hashCode(this.numberOfIterations);
     return result;
   }
@@ -217,12 +217,12 @@ public class ACOParameters {
   }
   
   @Pure
-  public Integer getNunberOfAnts() {
-    return this.nunberOfAnts;
+  public Integer getNumberOfAnts() {
+    return this.numberOfAnts;
   }
   
-  public void setNunberOfAnts(final Integer nunberOfAnts) {
-    this.nunberOfAnts = nunberOfAnts;
+  public void setNumberOfAnts(final Integer numberOfAnts) {
+    this.numberOfAnts = numberOfAnts;
   }
   
   @Pure

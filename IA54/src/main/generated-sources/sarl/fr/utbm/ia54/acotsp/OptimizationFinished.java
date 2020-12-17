@@ -13,13 +13,13 @@ import org.eclipse.xtext.xbase.lib.util.ToStringBuilder;
 @SarlElementType(15)
 @SuppressWarnings("all")
 public class OptimizationFinished extends Event {
-  public ArrayList<ArrayList<Double>> pheromones;
+  public ArrayList<ArrayList<Float>> pheromones;
   
   public ArrayList<Integer> bestPath;
   
   public Float bestPathLength;
   
-  public OptimizationFinished(final ArrayList<ArrayList<Double>> p, final ArrayList<Integer> bstPath, final Float bstPathLength) {
+  public OptimizationFinished(final ArrayList<ArrayList<Float>> p, final ArrayList<Integer> bstPath, final Float bstPathLength) {
     this.pheromones = p;
     this.bestPath = bstPath;
     this.bestPathLength = bstPathLength;
@@ -68,5 +68,5 @@ public class OptimizationFinished extends Event {
   }
   
   @SyntheticMember
-  private static final long serialVersionUID = 4497302559L;
+  private static final long serialVersionUID = 2147716543L;
 }

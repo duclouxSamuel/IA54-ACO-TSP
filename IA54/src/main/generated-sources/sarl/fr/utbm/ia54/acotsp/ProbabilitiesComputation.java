@@ -14,7 +14,7 @@ import java.util.ArrayList;
 @SarlElementType(20)
 @SuppressWarnings("all")
 public interface ProbabilitiesComputation extends Capacity {
-  public abstract ArrayList<Float> probabilitiesComputation(final Integer currentCity, final ArrayList<Float> probabilities, final ArrayList<Integer> visitedCities, final ArrayList<Integer> visitedClusterss, final ArrayList<ArrayList<Double>> pheromones);
+  public abstract ArrayList<Double> probabilitiesComputation(final Integer currentCity, final ArrayList<Double> probabilities, final ArrayList<Integer> visitedCities, final ArrayList<Integer> visitedClusterss, final ArrayList<ArrayList<Float>> pheromones);
   
   /**
    * @ExcludeFromApidoc
@@ -24,7 +24,7 @@ public interface ProbabilitiesComputation extends Capacity {
       super(capacity, caller);
     }
     
-    public ArrayList<Float> probabilitiesComputation(final Integer currentCity, final ArrayList<Float> probabilities, final ArrayList<Integer> visitedCities, final ArrayList<Integer> visitedClusterss, final ArrayList<ArrayList<Double>> pheromones) {
+    public ArrayList<Double> probabilitiesComputation(final Integer currentCity, final ArrayList<Double> probabilities, final ArrayList<Integer> visitedCities, final ArrayList<Integer> visitedClusterss, final ArrayList<ArrayList<Float>> pheromones) {
       try {
         ensureCallerInLocalThread();
         return this.capacity.probabilitiesComputation(currentCity, probabilities, visitedCities, visitedClusterss, pheromones);

@@ -11,6 +11,8 @@ import io.sarl.core.Lifecycle
 import io.sarl.core.Logging
 import java.util.ArrayList
 import java.util.UUID
+import java.util.Random;
+import java.util.HashSet
 
 /** 
  * @author Omen
@@ -32,97 +34,120 @@ agent ACOManager {
 
 	var currentBestPathLength : Float
 
-	var pheromones = new ArrayList<ArrayList<Double>>
+	var pheromones = new ArrayList<ArrayList<Float>>
 
 	var numberOfIterationsDone : Integer
 	
-	var acoAgentsID : ArrayList<UUID>
+	var numberOfIterationsWithoutChanges : Integer
+
+	var acoAgentsReady : ArrayList<UUID>
 
 	on Initialize {
-		// Event trigger before the agent begin to live or to be used.
-		// You should put all the initialization statements in this block of code.
 		info("The agent was started.")
+		loggingName = "ACOManager"
 	}
 
 	on Destroy {
-		// Event trigger when the agent is destroyed from the system.
-		// You should put all the resource releasing statements in this block of code.
 		info("The agent was stopped.")
 	}
 
 	on NewOptimization {
-		info("J'ai recu l'ordre de nouvelle optim")
+		info("J'ai recu l'ordre d'une nouvelle optim")
 		acoParameters = occurrence.acoParameters as ACOParameters
-		acoAgentsID = new ArrayList<UUID>
 		numberOfIterationsDone = 0
-		currentBestPathLength = new Float(0)
-		paths = new ArrayList<ArrayList<Integer>>
-		pathsLength = new ArrayList<Float>
-		initializePheromones(0d)
+		numberOfIterationsWithoutChanges = 0
+		currentBestPathLength = new Float(999999)
+		initializePheromones()
 		launchACOAgents()
-//		launchIterations()
 	}
 
 	on IterationFinished {
-		paths.add(occurrence.path)
-		pathsLength.add(occurrence.pathLength)
-		if (paths.size() === acoParameters.nunberOfAnts) {
-			pheromones = updatePheromones()
-			numberOfIterationsDone++
-			if (pathsLength.get(pathsLength.indexOf(pathsLength.max())) > currentBestPathLength) {
-				currentBestPath = paths.get(pathsLength.indexOf(pathsLength.max()))
-				currentBestPathLength = pathsLength.get(pathsLength.indexOf(pathsLength.max()))
+		synchronized (paths) {
+			synchronized (pathsLength) {
+				var path = occurrence.path
+				var pathLength = occurrence.pathLength
+				paths.add(path)
+				pathsLength.add(pathLength)
+				// var set = new HashSet<Integer>(path);
+				// if (set.size() < path.size()) {
+				// info('ALERT DUPLICATE ')
+				// info('Path vs occurence path : ' + path + occurrence.path)
+				// info('Pheromones :' + pheromones)
+				// }
+				if (paths.size() === acoParameters.numberOfAnts) {
+					if (numberOfIterationsWithoutChanges > 25) {
+						pheromones = updatePheromonesWithMutation()
+					}
+					else {
+						pheromones = updatePheromones()
+						
+					}
+					// info('Phéromones : ' + pheromones)
+					numberOfIterationsDone++
+					if (pathsLength.get(pathsLength.indexOf(pathsLength.min())) < currentBestPathLength) {
+						currentBestPath = paths.get(pathsLength.indexOf(pathsLength.min()))
+						currentBestPathLength = pathsLength.get(pathsLength.indexOf(pathsLength.min()))
+						numberOfIterationsWithoutChanges = 0
+						info(
+							"Itération : " + numberOfIterationsDone + " Meilleur chemin : " + currentBestPathLength +
+								' Parcours : ' + currentBestPath.toString)
+					}
+					else {
+						numberOfIterationsWithoutChanges++
+					}
+					if (numberOfIterationsDone === acoParameters.numberOfIterations) {
+						emit(new OptimizationFinished(pheromones, currentBestPath, currentBestPathLength))
+						info("Fin d'optimisation  " + "meilleur chemin : " + currentBestPathLength + ' parcours' +
+							currentBestPath.toString)
+					} else {
+						launchIteration()
+					}
+				}
 			}
-			if (numberOfIterationsDone === acoParameters.numberOfIterations) {
-				emit(new OptimizationFinished(pheromones, currentBestPath, currentBestPathLength))
-			} else {
-				launchACOAgents()
-//				innerContext.defaultSpace.emit(myUUID, new NewIteration(pheromones))
-			}
-				 info("Itération :" + numberOfIterationsDone + "meilleur chemin" + currentBestPathLength + ' parcours' + currentBestPath.toString)
 		}
+	}
+
+	on AgentIsReady {
+		acoAgentsReady.add(occurrence.source.UUID)
+		if (acoAgentsReady.size == acoParameters.numberOfAnts)
+			launchIteration()
 	}
 
 	def launchACOAgents() {
-		for (var i = 0; i < acoParameters.nunberOfAnts; i++) {
+		acoAgentsReady = new ArrayList<UUID>
+		for (var i = 0; i < acoParameters.numberOfAnts; i++) {
 			val childID = UUID.randomUUID
-//			info("Spawning new ACOAgent" + childID + "on City :" + i)
-			ACOAgent.spawnInContextWithID(childID, innerContext, myUUID, i, acoParameters, pheromones)
-			acoAgentsID.add(childID)
+			// info("Spawning new ACOAgent" + childID + "on City :" + i)
+			var startingCity = (Math.random() * acoParameters.numberOfCities).toInteger
+			ACOAgent.spawnInContextWithID(childID, innerContext, myUUID, startingCity, acoParameters)
 		}
 	}
 
-	def launchIterations() {
-		synchronized(acoAgentsID) {
-			while (acoAgentsID.size < acoParameters.nunberOfAnts) {
-				info(acoAgentsID.size)
-			}
-			numberOfIterationsDone = 0
-			currentBestPathLength = new Float(0)
-			initializePheromones(0d)
-			paths = new ArrayList<ArrayList<Integer>>
-			pathsLength = new ArrayList<Float>
-			innerContext.defaultSpace.emit(myUUID, new NewIteration(pheromones))
+	def launchIteration() {
+		paths = new ArrayList<ArrayList<Integer>>
+		pathsLength = new ArrayList<Float>
+		for (acoAgent : acoAgentsReady) {
+			innerContext.defaultSpace.emit(myUUID, new NewIteration(pheromones))[it.UUID == acoAgent]
 		}
 	}
 
-	def initializePheromones(initialPheromoneValue : Double) {
+	def initializePheromones {
 		for (var i = 0; i < acoParameters.numberOfCities; i++) {
-			var temp = new ArrayList<Double>
+			var temp = new ArrayList<Float>
 			for (var j = 0; j < acoParameters.numberOfCities; j++) {
-				temp.add(initialPheromoneValue)
+				temp.add(1f)
 			}
 			pheromones.add(temp)
 		}
 	}
 
 	def updatePheromones() {
-		var newPheromones = new ArrayList<ArrayList<Double>>
-		var sumOfpheromoneDelta = pheromoneDeltaComputation()
+		var newPheromones = new ArrayList<ArrayList<Float>>
 		for (var i = 0; i < acoParameters.numberOfCities; i++) {
-			var temp = new ArrayList<Double>
+			var temp = new ArrayList<Float>
 			for (var j = 0; j < acoParameters.numberOfCities; j++) {
-				var newValue = acoParameters.pheromoneEvaporationFactor * pheromones.get(i).get(j) + sumOfpheromoneDelta
+				var newValue = acoParameters.pheromoneEvaporationFactor * pheromones.get(i).get(j) +
+					sumOfPheromoneDeltaComputation(i, j)
 				temp.add(newValue)
 			}
 			newPheromones.add(temp)
@@ -130,17 +155,89 @@ agent ACOManager {
 		return newPheromones
 	}
 
-	def pheromoneDeltaComputation() {
-		var sumOfpheromoneDelta = 0d
-		for (var k = 0; k < paths.size(); k++) {
-			for (var i = 0; i < acoParameters.numberOfCities; i++) {
-				for (var j = 0; j < acoParameters.numberOfCities; j++) {
-					if (paths.get(k).contains(i) && paths.get(k).contains(j))
+	def updatePheromonesWithMutation() {
+		var newPheromones = new ArrayList<ArrayList<Float>>
+		var minPheromones = pheromones.get(0).get(0)
+		var minPheromonesIndex = new Pair<Integer, Integer>(0, 0)
+		var maxPheromones = pheromones.get(0).get(0)
+		var maxPheromonesIndex = new Pair<Integer, Integer>(0, 0)
+		for (var i = 0; i < acoParameters.numberOfCities; i++) {
+			var temp = new ArrayList<Float>
+			for (var j = 0; j < acoParameters.numberOfCities; j++) {
+				var newValue = acoParameters.pheromoneEvaporationFactor * pheromones.get(i).get(j) +
+					sumOfPheromoneDeltaComputation(i, j)
+				temp.add(newValue)
+				if (newValue < minPheromones) {
+					minPheromones = newValue
+					minPheromonesIndex = new Pair<Integer, Integer>(i, j)
+				}
+				else if (newValue > maxPheromones) {
+					maxPheromones = newValue
+					maxPheromonesIndex = new Pair<Integer, Integer>(i, j)
+				}
+			}
+			newPheromones.add(temp)
+		}
+		newPheromones.get(minPheromonesIndex.getKey()).set(minPheromonesIndex.getValue(), maxPheromones)
+		newPheromones.get(maxPheromonesIndex.getKey()).set(maxPheromonesIndex.getValue(), minPheromones)
+		return newPheromones
+	}
+
+	def sumOfPheromoneDeltaComputation(i : Integer, j : Integer) : float {
+		var sumOfpheromoneDelta = 0f
+		synchronized (paths) {
+			synchronized (pathsLength) {
+				for (var k = 0; k < paths.size(); k++) {
+					if (i != j && isEdgeVisited(paths.get(k), i, j)) {
 						sumOfpheromoneDelta += 1 / pathsLength.get(k)
+					}
 				}
 			}
 		}
 		return sumOfpheromoneDelta
+	}
+
+	def isEdgeVisited(path : ArrayList<Integer>, i : Integer, j : Integer) : boolean {
+		var response = false
+		if (path.get(0) == i && path.get(path.size - 1) == j) {
+			response = true
+		} else if (path.get(0) == j && path.get(path.size - 1) == i) {
+			response = true
+		} else {
+			for (var n = 0; n < path.size - 1; n++) {
+				if (path.get(n) == i && path.get(n + 1) == j) {
+					response = true
+				} else if (path.get(n) == j && path.get(n + 1) == i) {
+					response = true
+				}
+			}
+		}
+		return response
+	}
+
+	def computePathLength(path : ArrayList<Integer>) {
+		var length = 0f
+		for (var i = 0; i < path.size - 1; i++)
+			length = length + acoParameters.distances.get(path.get(i)).get(path.get(i + 1))
+		length = length + acoParameters.distances.get(path.get(path.size - 1)).get(path.get(0))
+		return length
+	}
+
+	def mutation(path : ArrayList<Integer>) {
+		var generator = new Random()
+		if (generator.nextInt(100 + 1) < 5) {
+			var t = path.get(generator.nextInt(path.size))
+			var temp = new ArrayList<Integer>
+			for (var i = 0; i < acoParameters.numberOfCities; i++) {
+				if (acoParameters.attachedCluster.get(i) == acoParameters.attachedCluster.get(t))
+					temp.add(i)
+			}
+			var s = temp.get(generator.nextInt(temp.size))
+			// info(t + ' is replace by ' + s + ' in path : ' + path.toString)
+			path.set(path.indexOf(t), s)
+			// info(' new path : ' + path)
+		}
+		return path
 	}
 
 }

@@ -10,9 +10,9 @@ import java.util.ArrayList
  * 
  */
 capacity ProbabilitiesComputation {
-	def probabilitiesComputation(currentCity : Integer, probabilities : ArrayList<Float>,
+	def probabilitiesComputation(currentCity : Integer, probabilities : ArrayList<Double>,
 		visitedCities : ArrayList<Integer>, visitedClusterss : ArrayList<Integer>,
-		pheromones : ArrayList<ArrayList<Double>>) : ArrayList<Float>
+		pheromones : ArrayList<ArrayList<Float>>) : ArrayList<Double>
 }
 
 @SuppressWarnings("potential_field_synchronization_problem")
@@ -37,9 +37,9 @@ skill SimpleProbabilitiesComputationSkill implements ProbabilitiesComputation {
 		this.visibilityRegulationFactor = ivisibilityRegulationFactor
 	}
 
-	def probabilitiesComputation(currentCity : Integer, probabilities : ArrayList<Float>,
+	def probabilitiesComputation(currentCity : Integer, probabilities : ArrayList<Double>,
 		visitedCities : ArrayList<Integer>, visitedClusters : ArrayList<Integer>,
-		pheromones : ArrayList<ArrayList<Double>>) : ArrayList<Float> {
+		pheromones : ArrayList<ArrayList<Float>>) : ArrayList<Double> {
 		var sumOfAllowedCities = 0d
 
 		for (var i = 0; i < numberOfCities; i++) {
@@ -50,14 +50,17 @@ skill SimpleProbabilitiesComputationSkill implements ProbabilitiesComputation {
 		}
 		for (var i = 0; i < numberOfCities; i++) {
 			var probability = 0d
-			if (!visitedClusters.contains(attachedCluster.get(i))) {
+			if (!visitedClusters.contains(attachedCluster.get(i)) && sumOfAllowedCities > 0) {
 				probability = Math.pow(pheromones.get(currentCity).get(i) as double, pheromoneRegulationFactor) *
 					Math.pow(1 / distances.get(currentCity).get(i) as double, visibilityRegulationFactor) /
 					sumOfAllowedCities
 			}
-			probabilities.add(probability.toFloat)
+			if (currentCity == i) {
+				probabilities.add(0d)
+			} else {
+				probabilities.add(probability)
+			}
 		}
-
 		return probabilities
 	}
 
@@ -85,12 +88,12 @@ skill ProbabilitiesComputationWithGroupInfluenceSkill implements ProbabilitiesCo
 		this.visibilityRegulationFactor = ivisibilityRegulationFactor
 	}
 
-	def probabilitiesComputation(currentCity : Integer, probabilities : ArrayList<Float>,
+	def probabilitiesComputation(currentCity : Integer, probabilities : ArrayList<Double>,
 		visitedCities : ArrayList<Integer>, visitedClusters : ArrayList<Integer>,
-		pheromones : ArrayList<ArrayList<Double>>) : ArrayList<Float> {
+		pheromones : ArrayList<ArrayList<Float>>) : ArrayList<Double> {
 		var sumOfAllowedCities = 0d
 		var sumOfAllowedCitiesWithGroupInfluence = 0d
-		var factorOfAllowedCitiesGroup : ArrayList<Double> = new ArrayList<Double>
+		var factorOfAllowedCitiesGroup = new ArrayList<Double>
 		for (var i = 0; i < numberOfCities; i++) {
 			if (!visitedClusters.contains(attachedCluster.get(i)))
 				sumOfAllowedCities +=
@@ -99,11 +102,14 @@ skill ProbabilitiesComputationWithGroupInfluenceSkill implements ProbabilitiesCo
 		}
 		for (var i = 0; i < numberOfCities; i++) {
 			var sumOfClusterCities = 0d
-			if (!visitedClusters.contains(attachedCluster.get(i)))
+			if (!visitedClusters.contains(attachedCluster.get(i)) && sumOfAllowedCities > 0) {
 				sumOfClusterCities +=
 					Math.pow(pheromones.get(currentCity).get(i) as double, pheromoneRegulationFactor) *
 						Math.pow(1 / distances.get(currentCity).get(i) as double, visibilityRegulationFactor)
-			factorOfAllowedCitiesGroup.add(sumOfClusterCities / sumOfAllowedCities)
+				factorOfAllowedCitiesGroup.add(sumOfClusterCities / sumOfAllowedCities)
+			} else {
+				factorOfAllowedCitiesGroup.add(0d)
+			}
 		}
 		for (var i = 0; i < numberOfCities; i++) {
 			if (!visitedClusters.contains(attachedCluster.get(i)))
@@ -114,10 +120,17 @@ skill ProbabilitiesComputationWithGroupInfluenceSkill implements ProbabilitiesCo
 		}
 
 		for (var i = 0; i < numberOfCities; i++) {
-			var probability = Math.pow(pheromones.get(currentCity).get(i) as double, pheromoneRegulationFactor) *
-				Math.pow(1 / distances.get(currentCity).get(i) as double, visibilityRegulationFactor) *
-				factorOfAllowedCitiesGroup.get(i) / sumOfAllowedCitiesWithGroupInfluence
-			probabilities.add(probability.toFloat)
+			var probability = 0d
+			if (sumOfAllowedCitiesWithGroupInfluence > 0) {
+				probability = Math.pow(pheromones.get(currentCity).get(i) as double, pheromoneRegulationFactor) *
+					Math.pow(1 / distances.get(currentCity).get(i) as double, visibilityRegulationFactor) *
+					factorOfAllowedCitiesGroup.get(i) / sumOfAllowedCitiesWithGroupInfluence
+			}
+			if (currentCity == i) {
+				probabilities.add(0d)
+			} else {
+				probabilities.add(probability)
+			}
 		}
 
 		return probabilities

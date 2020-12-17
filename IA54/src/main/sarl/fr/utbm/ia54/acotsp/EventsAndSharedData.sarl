@@ -20,9 +20,9 @@ event NewOptimization {
 }
 
 event NewIteration {
-	var pheromones : ArrayList<ArrayList<Double>>
+	var pheromones : ArrayList<ArrayList<Float>>
 
-	new(p : ArrayList<ArrayList<Double>>) {
+	new(p : ArrayList<ArrayList<Float>>) {
 		pheromones = p
 	}
 }
@@ -39,11 +39,11 @@ event IterationFinished {
 }
 
 event OptimizationFinished {
-	var pheromones : ArrayList<ArrayList<Double>>
+	var pheromones : ArrayList<ArrayList<Float>>
 	var bestPath : ArrayList<Integer>
 	var bestPathLength : Float
 
-	new(p : ArrayList<ArrayList<Double>>, bstPath : ArrayList<Integer>, bstPathLength : Float) {
+	new(p : ArrayList<ArrayList<Float>>, bstPath : ArrayList<Integer>, bstPathLength : Float) {
 		pheromones = p
 		bestPath = bstPath
 		bestPathLength = bstPathLength
@@ -51,16 +51,18 @@ event OptimizationFinished {
 }
 
 event GuiRepaint {
-	var pheromones : ArrayList<ArrayList<Double>>
+	var pheromones : ArrayList<ArrayList<Float>>
 	var bestPath : ArrayList<Integer>
 	var bestPathLength : Float
 
-	new(p : ArrayList<ArrayList<Double>>, bstPath : ArrayList<Integer>, bstPathLength : Float) {
+	new(p : ArrayList<ArrayList<Float>>, bstPath : ArrayList<Integer>, bstPathLength : Float) {
 		pheromones = p
 		bestPath = bstPath
 		bestPathLength = bstPathLength
 	}
 }
+
+event AgentIsReady
 
 class ACOParameters {
 
@@ -98,7 +100,7 @@ class ACOParameters {
 
 	// Nombre de fourmis
 	@Accessors
-	var nunberOfAnts : Integer
+	var numberOfAnts : Integer
 
 	// Nombre d'itérations réalisées lors d'une optimisation
 	@Accessors
@@ -107,7 +109,7 @@ class ACOParameters {
 	new (inumberOfCities : Integer, inumberOfClusters : Integer, idistances : ArrayList<ArrayList<Float>>,
 		ipositions : ArrayList<ArrayList<Float>>, iattachedCluster : ArrayList<Integer>,
 		ipheromoneEvaporationFactor : Float, ipheromoneRegulationFactor : Float, ivisibilityRegulationFactor : Float,
-		inunberOfAnts : Integer, inumberOfIterations : Integer) {
+		inumberOfAnts : Integer, inumberOfIterations : Integer) {
 		numberOfCities = inumberOfCities
 		numberOfClusters = inumberOfClusters
 		distances = idistances
@@ -116,7 +118,7 @@ class ACOParameters {
 		pheromoneEvaporationFactor = ipheromoneEvaporationFactor
 		pheromoneRegulationFactor = ipheromoneRegulationFactor
 		visibilityRegulationFactor = ivisibilityRegulationFactor
-		nunberOfAnts = inunberOfAnts
+		numberOfAnts = inumberOfAnts
 		numberOfIterations = inumberOfIterations
 	}
 
@@ -129,7 +131,7 @@ class ACOParameters {
 		pheromoneEvaporationFactor = acoParameters.pheromoneEvaporationFactor
 		pheromoneRegulationFactor = acoParameters.pheromoneRegulationFactor
 		visibilityRegulationFactor = acoParameters.visibilityRegulationFactor
-		nunberOfAnts = acoParameters.nunberOfAnts
+		numberOfAnts = acoParameters.numberOfAnts
 		numberOfIterations = acoParameters.numberOfIterations
 	}
 

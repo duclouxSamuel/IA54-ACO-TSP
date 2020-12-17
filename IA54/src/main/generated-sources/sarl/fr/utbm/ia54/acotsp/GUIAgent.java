@@ -38,13 +38,13 @@ public class GUIAgent extends Agent {
     try {
       Logging _$CAPACITY_USE$IO_SARL_CORE_LOGGING$CALLER = this.$CAPACITY_USE$IO_SARL_CORE_LOGGING$CALLER();
       _$CAPACITY_USE$IO_SARL_CORE_LOGGING$CALLER.info("The agent was started.");
-      File _file = new File("C:/Users/yaben/Documents/UTBM/GI05/IA54/Projet/Test GTSP/3burma14.txt");
+      File _file = new File("C:/Users/yaben/Documents/UTBM/GI05/IA54/Projet/Test GTSP/20kroB100.txt");
       Gtsp gtsp = new Gtsp(_file);
-      float pheromoneEvaporationFactor = 1f;
+      float pheromoneEvaporationFactor = 0.2f;
       float pheromoneRegulationFactor = 1f;
-      float visibilityRegulationFactor = 1f;
-      int nunberOfAnts = gtsp.getDimension();
-      int numberOfIterations = 50;
+      float visibilityRegulationFactor = 1.5f;
+      int nunberOfAnts = 70;
+      int numberOfIterations = 100;
       int _dimension = gtsp.getDimension();
       int _groupDimension = gtsp.getGroupDimension();
       ArrayList<ArrayList<Float>> _convertToFloatArrayList = this.convertToFloatArrayList(gtsp.getNode_dist());

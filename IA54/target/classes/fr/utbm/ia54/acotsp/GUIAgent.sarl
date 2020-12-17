@@ -18,15 +18,13 @@ agent GUIAgent {
 	uses Logging, DefaultContextInteractions
 
 	on Initialize {
-		// Event trigger before the agent begin to live or to be used.
-		// You should put all the initialization statements in this block of code.
 		info("The agent was started.")
-		var gtsp = new Gtsp(new File('C:/Users/yaben/Documents/UTBM/GI05/IA54/Projet/Test GTSP/3burma14.txt'))
-		var pheromoneEvaporationFactor = 1f
+		var gtsp = new Gtsp(new File('C:/Users/yaben/Documents/UTBM/GI05/IA54/Projet/Test GTSP/20kroB100.txt'))
+		var pheromoneEvaporationFactor = 0.2f
 		var pheromoneRegulationFactor = 1f
-		var visibilityRegulationFactor = 1f
-		var nunberOfAnts = gtsp.dimension
-		var numberOfIterations = 50
+		var visibilityRegulationFactor = 1.5f
+		var nunberOfAnts = /*gtsp.dimension*/ 70
+		var numberOfIterations = 100
 		var acoParameters = new ACOParameters(
 			gtsp.dimension,
 			gtsp.groupDimension,

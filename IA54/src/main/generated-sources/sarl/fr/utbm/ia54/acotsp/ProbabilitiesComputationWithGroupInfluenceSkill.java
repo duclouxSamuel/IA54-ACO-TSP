@@ -31,15 +31,15 @@ public class ProbabilitiesComputationWithGroupInfluenceSkill extends Skill imple
     this.visibilityRegulationFactor = ivisibilityRegulationFactor;
   }
   
-  public ArrayList<Float> probabilitiesComputation(final Integer currentCity, final ArrayList<Float> probabilities, final ArrayList<Integer> visitedCities, final ArrayList<Integer> visitedClusters, final ArrayList<ArrayList<Double>> pheromones) {
+  public ArrayList<Double> probabilitiesComputation(final Integer currentCity, final ArrayList<Double> probabilities, final ArrayList<Integer> visitedCities, final ArrayList<Integer> visitedClusters, final ArrayList<ArrayList<Float>> pheromones) {
     double sumOfAllowedCities = 0d;
     double sumOfAllowedCitiesWithGroupInfluence = 0d;
     ArrayList<Double> factorOfAllowedCitiesGroup = new ArrayList<Double>();
     for (int i = 0; (i < this.numberOfCities.doubleValue()); i++) {
       boolean _contains = visitedClusters.contains(this.attachedCluster.get(i));
       if ((!_contains)) {
-        Double _get = pheromones.get(((currentCity) == null ? 0 : (currentCity).intValue())).get(i);
-        double _pow = Math.pow(((_get) == null ? 0 : (_get).doubleValue()), ((this.pheromoneRegulationFactor) == null ? 0 : (this.pheromoneRegulationFactor).floatValue()));
+        Float _get = pheromones.get(((currentCity) == null ? 0 : (currentCity).intValue())).get(i);
+        double _pow = Math.pow(((_get) == null ? 0 : (_get).floatValue()), ((this.pheromoneRegulationFactor) == null ? 0 : (this.pheromoneRegulationFactor).floatValue()));
         Float _get_1 = this.distances.get(((currentCity) == null ? 0 : (currentCity).intValue())).get(i);
         double _pow_1 = Math.pow((1 / ((_get_1) == null ? 0 : (_get_1).floatValue())), ((this.visibilityRegulationFactor) == null ? 0 : (this.visibilityRegulationFactor).floatValue()));
         sumOfAllowedCities = (sumOfAllowedCities + 
@@ -49,23 +49,24 @@ public class ProbabilitiesComputationWithGroupInfluenceSkill extends Skill imple
     for (int i = 0; (i < this.numberOfCities.doubleValue()); i++) {
       {
         double sumOfClusterCities = 0d;
-        boolean _contains = visitedClusters.contains(this.attachedCluster.get(i));
-        if ((!_contains)) {
-          Double _get = pheromones.get(((currentCity) == null ? 0 : (currentCity).intValue())).get(i);
-          double _pow = Math.pow(((_get) == null ? 0 : (_get).doubleValue()), ((this.pheromoneRegulationFactor) == null ? 0 : (this.pheromoneRegulationFactor).floatValue()));
+        if (((!visitedClusters.contains(this.attachedCluster.get(i))) && (sumOfAllowedCities > 0))) {
+          Float _get = pheromones.get(((currentCity) == null ? 0 : (currentCity).intValue())).get(i);
+          double _pow = Math.pow(((_get) == null ? 0 : (_get).floatValue()), ((this.pheromoneRegulationFactor) == null ? 0 : (this.pheromoneRegulationFactor).floatValue()));
           Float _get_1 = this.distances.get(((currentCity) == null ? 0 : (currentCity).intValue())).get(i);
           double _pow_1 = Math.pow((1 / ((_get_1) == null ? 0 : (_get_1).floatValue())), ((this.visibilityRegulationFactor) == null ? 0 : (this.visibilityRegulationFactor).floatValue()));
           sumOfClusterCities = (sumOfClusterCities + 
             (_pow * _pow_1));
+          factorOfAllowedCitiesGroup.add(Double.valueOf((sumOfClusterCities / sumOfAllowedCities)));
+        } else {
+          factorOfAllowedCitiesGroup.add(Double.valueOf(0d));
         }
-        factorOfAllowedCitiesGroup.add(Double.valueOf((sumOfClusterCities / sumOfAllowedCities)));
       }
     }
     for (int i = 0; (i < this.numberOfCities.doubleValue()); i++) {
       boolean _contains = visitedClusters.contains(this.attachedCluster.get(i));
       if ((!_contains)) {
-        Double _get = pheromones.get(((currentCity) == null ? 0 : (currentCity).intValue())).get(i);
-        double _pow = Math.pow(((_get) == null ? 0 : (_get).doubleValue()), ((this.pheromoneRegulationFactor) == null ? 0 : (this.pheromoneRegulationFactor).floatValue()));
+        Float _get = pheromones.get(((currentCity) == null ? 0 : (currentCity).intValue())).get(i);
+        double _pow = Math.pow(((_get) == null ? 0 : (_get).floatValue()), ((this.pheromoneRegulationFactor) == null ? 0 : (this.pheromoneRegulationFactor).floatValue()));
         Float _get_1 = this.distances.get(((currentCity) == null ? 0 : (currentCity).intValue())).get(i);
         double _pow_1 = Math.pow((1 / ((_get_1) == null ? 0 : (_get_1).floatValue())), ((this.visibilityRegulationFactor) == null ? 0 : (this.visibilityRegulationFactor).floatValue()));
         double _multiply = (_pow * _pow_1);
@@ -76,14 +77,21 @@ public class ProbabilitiesComputationWithGroupInfluenceSkill extends Skill imple
     }
     for (int i = 0; (i < this.numberOfCities.doubleValue()); i++) {
       {
-        Double _get = pheromones.get(((currentCity) == null ? 0 : (currentCity).intValue())).get(i);
-        double _pow = Math.pow(((_get) == null ? 0 : (_get).doubleValue()), ((this.pheromoneRegulationFactor) == null ? 0 : (this.pheromoneRegulationFactor).floatValue()));
-        Float _get_1 = this.distances.get(((currentCity) == null ? 0 : (currentCity).intValue())).get(i);
-        double _pow_1 = Math.pow((1 / ((_get_1) == null ? 0 : (_get_1).floatValue())), ((this.visibilityRegulationFactor) == null ? 0 : (this.visibilityRegulationFactor).floatValue()));
-        double _multiply = (_pow * _pow_1);
-        Double _get_2 = factorOfAllowedCitiesGroup.get(i);
-        double probability = ((_multiply * ((_get_2) == null ? 0 : (_get_2).doubleValue())) / sumOfAllowedCitiesWithGroupInfluence);
-        probabilities.add(Float.valueOf((float) probability));
+        double probability = 0d;
+        if ((sumOfAllowedCitiesWithGroupInfluence > 0)) {
+          Float _get = pheromones.get(((currentCity) == null ? 0 : (currentCity).intValue())).get(i);
+          double _pow = Math.pow(((_get) == null ? 0 : (_get).floatValue()), ((this.pheromoneRegulationFactor) == null ? 0 : (this.pheromoneRegulationFactor).floatValue()));
+          Float _get_1 = this.distances.get(((currentCity) == null ? 0 : (currentCity).intValue())).get(i);
+          double _pow_1 = Math.pow((1 / ((_get_1) == null ? 0 : (_get_1).floatValue())), ((this.visibilityRegulationFactor) == null ? 0 : (this.visibilityRegulationFactor).floatValue()));
+          double _multiply = (_pow * _pow_1);
+          Double _get_2 = factorOfAllowedCitiesGroup.get(i);
+          probability = ((_multiply * ((_get_2) == null ? 0 : (_get_2).doubleValue())) / sumOfAllowedCitiesWithGroupInfluence);
+        }
+        if ((currentCity != null && (currentCity.intValue() == i))) {
+          probabilities.add(Double.valueOf(0d));
+        } else {
+          probabilities.add(Double.valueOf(probability));
+        }
       }
     }
     return probabilities;
