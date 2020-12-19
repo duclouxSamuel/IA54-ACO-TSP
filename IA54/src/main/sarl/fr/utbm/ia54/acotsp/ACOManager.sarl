@@ -37,7 +37,7 @@ agent ACOManager {
 	var pheromones = new ArrayList<ArrayList<Float>>
 
 	var numberOfIterationsDone : Integer
-	
+
 	var numberOfIterationsWithoutChanges : Integer
 
 	var acoAgentsReady : ArrayList<UUID>
@@ -66,24 +66,39 @@ agent ACOManager {
 			synchronized (pathsLength) {
 				var path = occurrence.path
 				var pathLength = occurrence.pathLength
-				paths.add(path)
-				pathsLength.add(pathLength)
 				// var set = new HashSet<Integer>(path);
 				// if (set.size() < path.size()) {
 				// info('ALERT DUPLICATE ')
 				// info('Path vs occurence path : ' + path + occurrence.path)
 				// info('Pheromones :' + pheromones)
 				// }
+				paths.add(path)
+				pathsLength.add(pathLength)
 				if (paths.size() === acoParameters.numberOfAnts) {
-					if (numberOfIterationsWithoutChanges > 25) {
-						pheromones = updatePheromonesWithMutation()
-					}
-					else {
-						pheromones = updatePheromones()
-						
-					}
+					pheromones = updatePheromones()
 					// info('Phéromones : ' + pheromones)
 					numberOfIterationsDone++
+					if (numberOfIterationsWithoutChanges > 15) {
+//						numberOfIterationsWithoutChanges = 0
+						var newPaths = new ArrayList<ArrayList<Integer>>
+						var newPathsLength = new ArrayList<Float>
+						info('Mutation')
+						for (p : paths) {
+							var generator = new Random()
+//							if (generator.nextInt(100 + 1) < 50) {
+								var newPath = mutation(p)
+								var newPathLength = computePathLength(newPath)
+								newPaths.add(newPath)
+								newPathsLength.add(newPathLength)
+//							} else {
+//								newPaths.add(p)
+//								newPathsLength.add(computePathLength(p))
+//							}
+						}
+						paths = newPaths
+						pathsLength = newPathsLength
+						initializePheromones()					
+					}
 					if (pathsLength.get(pathsLength.indexOf(pathsLength.min())) < currentBestPathLength) {
 						currentBestPath = paths.get(pathsLength.indexOf(pathsLength.min()))
 						currentBestPathLength = pathsLength.get(pathsLength.indexOf(pathsLength.min()))
@@ -91,8 +106,7 @@ agent ACOManager {
 						info(
 							"Itération : " + numberOfIterationsDone + " Meilleur chemin : " + currentBestPathLength +
 								' Parcours : ' + currentBestPath.toString)
-					}
-					else {
+					} else {
 						numberOfIterationsWithoutChanges++
 					}
 					if (numberOfIterationsDone === acoParameters.numberOfIterations) {
@@ -135,7 +149,11 @@ agent ACOManager {
 		for (var i = 0; i < acoParameters.numberOfCities; i++) {
 			var temp = new ArrayList<Float>
 			for (var j = 0; j < acoParameters.numberOfCities; j++) {
-				temp.add(1f)
+				if (i !== j) {
+					temp.add(1f)
+				} else {
+					temp.add(0f)
+				}
 			}
 			pheromones.add(temp)
 		}
@@ -148,6 +166,9 @@ agent ACOManager {
 			for (var j = 0; j < acoParameters.numberOfCities; j++) {
 				var newValue = acoParameters.pheromoneEvaporationFactor * pheromones.get(i).get(j) +
 					sumOfPheromoneDeltaComputation(i, j)
+				if (newValue < 1e-32 || i == j) {
+					newValue = 0f
+				}
 				temp.add(newValue)
 			}
 			newPheromones.add(temp)
@@ -157,29 +178,39 @@ agent ACOManager {
 
 	def updatePheromonesWithMutation() {
 		var newPheromones = new ArrayList<ArrayList<Float>>
-		var minPheromones = pheromones.get(0).get(0)
+		var minPheromones = 99999f
 		var minPheromonesIndex = new Pair<Integer, Integer>(0, 0)
-		var maxPheromones = pheromones.get(0).get(0)
+		var maxPheromones = 0f
 		var maxPheromonesIndex = new Pair<Integer, Integer>(0, 0)
 		for (var i = 0; i < acoParameters.numberOfCities; i++) {
 			var temp = new ArrayList<Float>
 			for (var j = 0; j < acoParameters.numberOfCities; j++) {
 				var newValue = acoParameters.pheromoneEvaporationFactor * pheromones.get(i).get(j) +
 					sumOfPheromoneDeltaComputation(i, j)
+				if (newValue < 1e-32 || i == j) {
+					newValue = 0f
+				}
 				temp.add(newValue)
-				if (newValue < minPheromones) {
+				if (newValue < minPheromones && newValue > 0f) {
 					minPheromones = newValue
 					minPheromonesIndex = new Pair<Integer, Integer>(i, j)
-				}
-				else if (newValue > maxPheromones) {
+				} else if (newValue > maxPheromones) {
 					maxPheromones = newValue
 					maxPheromonesIndex = new Pair<Integer, Integer>(i, j)
 				}
 			}
 			newPheromones.add(temp)
 		}
-		newPheromones.get(minPheromonesIndex.getKey()).set(minPheromonesIndex.getValue(), maxPheromones)
-		newPheromones.get(maxPheromonesIndex.getKey()).set(maxPheromonesIndex.getValue(), minPheromones)
+		info(
+			'Mutation de ' + minPheromonesIndex.toString + " value : " + minPheromones + ' à ' +
+				maxPheromonesIndex.toString + ' value : ' + maxPheromones)
+
+		if (minPheromonesIndex.getKey() != minPheromonesIndex.getValue() &&
+			maxPheromonesIndex.getKey() != maxPheromonesIndex.getValue()) {
+			newPheromones.get(minPheromonesIndex.getKey()).set(minPheromonesIndex.getValue(), maxPheromones)
+			newPheromones.get(maxPheromonesIndex.getKey()).set(maxPheromonesIndex.getValue(), minPheromones)
+		}
+
 		return newPheromones
 	}
 
@@ -225,18 +256,17 @@ agent ACOManager {
 
 	def mutation(path : ArrayList<Integer>) {
 		var generator = new Random()
-		if (generator.nextInt(100 + 1) < 5) {
-			var t = path.get(generator.nextInt(path.size))
-			var temp = new ArrayList<Integer>
-			for (var i = 0; i < acoParameters.numberOfCities; i++) {
-				if (acoParameters.attachedCluster.get(i) == acoParameters.attachedCluster.get(t))
-					temp.add(i)
-			}
-			var s = temp.get(generator.nextInt(temp.size))
-			// info(t + ' is replace by ' + s + ' in path : ' + path.toString)
-			path.set(path.indexOf(t), s)
-			// info(' new path : ' + path)
+		var t = path.get(generator.nextInt(path.size))
+		var temp = new ArrayList<Integer>
+		for (var i = 0; i < acoParameters.numberOfCities; i++) {
+			if (acoParameters.attachedCluster.get(i) == acoParameters.attachedCluster.get(t))
+				temp.add(i)
 		}
+
+		var s = temp.get(generator.nextInt(temp.size))
+//		info(t + ' is replace by ' + s + ' in path : ' + path.toString)
+		path.set(path.indexOf(t), s)
+		// info(' new path : ' + path)
 		return path
 	}
 

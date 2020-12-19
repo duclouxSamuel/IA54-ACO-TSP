@@ -98,20 +98,34 @@ public class ACOManager extends Agent {
         int _size = this.paths.size();
         Integer _numberOfAnts = this.acoParameters.getNumberOfAnts();
         if ((_size == ((_numberOfAnts) == null ? 0 : (_numberOfAnts).intValue()))) {
-          if ((this.numberOfIterationsWithoutChanges.intValue() > 25)) {
-            this.pheromones = this.updatePheromonesWithMutation();
-          } else {
-            this.pheromones = this.updatePheromones();
-          }
+          this.pheromones = this.updatePheromones();
           this.numberOfIterationsDone++;
+          if ((this.numberOfIterationsWithoutChanges.intValue() > 15)) {
+            ArrayList<ArrayList<Integer>> newPaths = new ArrayList<ArrayList<Integer>>();
+            ArrayList<Float> newPathsLength = new ArrayList<Float>();
+            Logging _$CAPACITY_USE$IO_SARL_CORE_LOGGING$CALLER = this.$CAPACITY_USE$IO_SARL_CORE_LOGGING$CALLER();
+            _$CAPACITY_USE$IO_SARL_CORE_LOGGING$CALLER.info("Mutation");
+            for (final ArrayList<Integer> p : this.paths) {
+              {
+                Random generator = new Random();
+                ArrayList<Integer> newPath = this.mutation(p);
+                float newPathLength = this.computePathLength(newPath);
+                newPaths.add(newPath);
+                newPathsLength.add(Float.valueOf(newPathLength));
+              }
+            }
+            this.paths = newPaths;
+            this.pathsLength = newPathsLength;
+            this.initializePheromones();
+          }
           Float _get = this.pathsLength.get(this.pathsLength.indexOf(IterableExtensions.<Float>min(this.pathsLength)));
           if ((_get.floatValue() < this.currentBestPathLength.doubleValue())) {
             this.currentBestPath = this.paths.get(this.pathsLength.indexOf(IterableExtensions.<Float>min(this.pathsLength)));
             this.currentBestPathLength = this.pathsLength.get(this.pathsLength.indexOf(IterableExtensions.<Float>min(this.pathsLength)));
             this.numberOfIterationsWithoutChanges = Integer.valueOf(0);
-            Logging _$CAPACITY_USE$IO_SARL_CORE_LOGGING$CALLER = this.$CAPACITY_USE$IO_SARL_CORE_LOGGING$CALLER();
+            Logging _$CAPACITY_USE$IO_SARL_CORE_LOGGING$CALLER_1 = this.$CAPACITY_USE$IO_SARL_CORE_LOGGING$CALLER();
             String _string = this.currentBestPath.toString();
-            _$CAPACITY_USE$IO_SARL_CORE_LOGGING$CALLER.info(
+            _$CAPACITY_USE$IO_SARL_CORE_LOGGING$CALLER_1.info(
               ((((("Itération : " + this.numberOfIterationsDone) + " Meilleur chemin : ") + this.currentBestPathLength) + 
                 " Parcours : ") + _string));
           } else {
@@ -122,9 +136,9 @@ public class ACOManager extends Agent {
             DefaultContextInteractions _$CAPACITY_USE$IO_SARL_CORE_DEFAULTCONTEXTINTERACTIONS$CALLER = this.$CAPACITY_USE$IO_SARL_CORE_DEFAULTCONTEXTINTERACTIONS$CALLER();
             OptimizationFinished _optimizationFinished = new OptimizationFinished(this.pheromones, this.currentBestPath, this.currentBestPathLength);
             _$CAPACITY_USE$IO_SARL_CORE_DEFAULTCONTEXTINTERACTIONS$CALLER.emit(_optimizationFinished);
-            Logging _$CAPACITY_USE$IO_SARL_CORE_LOGGING$CALLER_1 = this.$CAPACITY_USE$IO_SARL_CORE_LOGGING$CALLER();
+            Logging _$CAPACITY_USE$IO_SARL_CORE_LOGGING$CALLER_2 = this.$CAPACITY_USE$IO_SARL_CORE_LOGGING$CALLER();
             String _string_1 = this.currentBestPath.toString();
-            _$CAPACITY_USE$IO_SARL_CORE_LOGGING$CALLER_1.info((((("Fin d\'optimisation  " + "meilleur chemin : ") + this.currentBestPathLength) + " parcours") + _string_1));
+            _$CAPACITY_USE$IO_SARL_CORE_LOGGING$CALLER_2.info((((("Fin d\'optimisation  " + "meilleur chemin : ") + this.currentBestPathLength) + " parcours") + _string_1));
           } else {
             this.launchIteration();
           }
@@ -199,7 +213,11 @@ public class ACOManager extends Agent {
       {
         ArrayList<Float> temp = new ArrayList<Float>();
         for (int j = 0; (j < this.acoParameters.getNumberOfCities().doubleValue()); j++) {
-          temp.add(Float.valueOf(1f));
+          if ((i != j)) {
+            temp.add(Float.valueOf(1f));
+          } else {
+            temp.add(Float.valueOf(0f));
+          }
         }
         this.pheromones.add(temp);
       }
@@ -217,6 +235,9 @@ public class ACOManager extends Agent {
             Float _get = this.pheromones.get(i).get(j);
             float _sumOfPheromoneDeltaComputation = this.sumOfPheromoneDeltaComputation(Integer.valueOf(i), Integer.valueOf(j));
             float newValue = ((((_pheromoneEvaporationFactor) == null ? 0 : (_pheromoneEvaporationFactor).floatValue()) * ((_get) == null ? 0 : (_get).floatValue())) + _sumOfPheromoneDeltaComputation);
+            if (((newValue < 1e-32) || (i == j))) {
+              newValue = 0f;
+            }
             temp.add(Float.valueOf(newValue));
           }
         }
@@ -228,9 +249,9 @@ public class ACOManager extends Agent {
   
   protected ArrayList<ArrayList<Float>> updatePheromonesWithMutation() {
     ArrayList<ArrayList<Float>> newPheromones = new ArrayList<ArrayList<Float>>();
-    Float minPheromones = this.pheromones.get(0).get(0);
+    float minPheromones = 99999f;
     Pair<Integer, Integer> minPheromonesIndex = new Pair<Integer, Integer>(Integer.valueOf(0), Integer.valueOf(0));
-    Float maxPheromones = this.pheromones.get(0).get(0);
+    float maxPheromones = 0f;
     Pair<Integer, Integer> maxPheromonesIndex = new Pair<Integer, Integer>(Integer.valueOf(0), Integer.valueOf(0));
     for (int i = 0; (i < this.acoParameters.getNumberOfCities().doubleValue()); i++) {
       {
@@ -241,14 +262,17 @@ public class ACOManager extends Agent {
             Float _get = this.pheromones.get(i).get(j);
             float _sumOfPheromoneDeltaComputation = this.sumOfPheromoneDeltaComputation(Integer.valueOf(i), Integer.valueOf(j));
             float newValue = ((((_pheromoneEvaporationFactor) == null ? 0 : (_pheromoneEvaporationFactor).floatValue()) * ((_get) == null ? 0 : (_get).floatValue())) + _sumOfPheromoneDeltaComputation);
+            if (((newValue < 1e-32) || (i == j))) {
+              newValue = 0f;
+            }
             temp.add(Float.valueOf(newValue));
-            if ((newValue < minPheromones.doubleValue())) {
-              minPheromones = Float.valueOf(newValue);
+            if (((newValue < minPheromones) && (newValue > 0f))) {
+              minPheromones = newValue;
               Pair<Integer, Integer> _pair = new Pair<Integer, Integer>(Integer.valueOf(i), Integer.valueOf(j));
               minPheromonesIndex = _pair;
             } else {
-              if ((newValue > maxPheromones.doubleValue())) {
-                maxPheromones = Float.valueOf(newValue);
+              if ((newValue > maxPheromones)) {
+                maxPheromones = newValue;
                 Pair<Integer, Integer> _pair_1 = new Pair<Integer, Integer>(Integer.valueOf(i), Integer.valueOf(j));
                 maxPheromonesIndex = _pair_1;
               }
@@ -258,8 +282,16 @@ public class ACOManager extends Agent {
         newPheromones.add(temp);
       }
     }
-    newPheromones.get(((minPheromonesIndex.getKey()) == null ? 0 : (minPheromonesIndex.getKey()).intValue())).set(((minPheromonesIndex.getValue()) == null ? 0 : (minPheromonesIndex.getValue()).intValue()), maxPheromones);
-    newPheromones.get(((maxPheromonesIndex.getKey()) == null ? 0 : (maxPheromonesIndex.getKey()).intValue())).set(((maxPheromonesIndex.getValue()) == null ? 0 : (maxPheromonesIndex.getValue()).intValue()), minPheromones);
+    Logging _$CAPACITY_USE$IO_SARL_CORE_LOGGING$CALLER = this.$CAPACITY_USE$IO_SARL_CORE_LOGGING$CALLER();
+    String _string = minPheromonesIndex.toString();
+    String _string_1 = maxPheromonesIndex.toString();
+    _$CAPACITY_USE$IO_SARL_CORE_LOGGING$CALLER.info(
+      ((((((("Mutation de " + _string) + " value : ") + Float.valueOf(minPheromones)) + " à ") + _string_1) + " value : ") + Float.valueOf(maxPheromones)));
+    if (((minPheromonesIndex.getKey() == null ? (minPheromonesIndex.getValue() != null) : (minPheromonesIndex.getValue() == null || minPheromonesIndex.getKey().intValue() != minPheromonesIndex.getValue().doubleValue())) && 
+      (maxPheromonesIndex.getKey() == null ? (maxPheromonesIndex.getValue() != null) : (maxPheromonesIndex.getValue() == null || maxPheromonesIndex.getKey().intValue() != maxPheromonesIndex.getValue().doubleValue())))) {
+      newPheromones.get(((minPheromonesIndex.getKey()) == null ? 0 : (minPheromonesIndex.getKey()).intValue())).set(((minPheromonesIndex.getValue()) == null ? 0 : (minPheromonesIndex.getValue()).intValue()), Float.valueOf(maxPheromones));
+      newPheromones.get(((maxPheromonesIndex.getKey()) == null ? 0 : (maxPheromonesIndex.getKey()).intValue())).set(((maxPheromonesIndex.getValue()) == null ? 0 : (maxPheromonesIndex.getValue()).intValue()), Float.valueOf(minPheromones));
+    }
     return newPheromones;
   }
   
@@ -315,20 +347,17 @@ public class ACOManager extends Agent {
   
   protected ArrayList<Integer> mutation(final ArrayList<Integer> path) {
     Random generator = new Random();
-    int _nextInt = generator.nextInt((100 + 1));
-    if ((_nextInt < 5)) {
-      Integer t = path.get(generator.nextInt(path.size()));
-      ArrayList<Integer> temp = new ArrayList<Integer>();
-      for (int i = 0; (i < this.acoParameters.getNumberOfCities().doubleValue()); i++) {
-        Integer _get = this.acoParameters.getAttachedCluster().get(i);
-        Integer _get_1 = this.acoParameters.getAttachedCluster().get(((t) == null ? 0 : (t).intValue()));
-        if ((_get == null ? (_get_1 == null) : (_get_1 != null && _get.intValue() == _get_1.doubleValue()))) {
-          temp.add(Integer.valueOf(i));
-        }
+    Integer t = path.get(generator.nextInt(path.size()));
+    ArrayList<Integer> temp = new ArrayList<Integer>();
+    for (int i = 0; (i < this.acoParameters.getNumberOfCities().doubleValue()); i++) {
+      Integer _get = this.acoParameters.getAttachedCluster().get(i);
+      Integer _get_1 = this.acoParameters.getAttachedCluster().get(((t) == null ? 0 : (t).intValue()));
+      if ((_get == null ? (_get_1 == null) : (_get_1 != null && _get.intValue() == _get_1.doubleValue()))) {
+        temp.add(Integer.valueOf(i));
       }
-      Integer s = temp.get(generator.nextInt(temp.size()));
-      path.set(path.indexOf(t), s);
     }
+    Integer s = temp.get(generator.nextInt(temp.size()));
+    path.set(path.indexOf(t), s);
     return path;
   }
   

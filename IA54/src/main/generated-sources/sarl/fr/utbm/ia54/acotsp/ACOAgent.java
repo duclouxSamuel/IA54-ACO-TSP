@@ -78,8 +78,6 @@ public class ACOAgent extends Agent {
     this.<ProbabilitiesComputationWithGroupInfluenceSkill>setSkill(_probabilitiesComputationWithGroupInfluenceSkill, ProbabilitiesComputation.class);
     Logging _$CAPACITY_USE$IO_SARL_CORE_LOGGING$CALLER = this.$CAPACITY_USE$IO_SARL_CORE_LOGGING$CALLER();
     _$CAPACITY_USE$IO_SARL_CORE_LOGGING$CALLER.setLoggingName(("ACOAgent starting at " + this.startingCity));
-    Logging _$CAPACITY_USE$IO_SARL_CORE_LOGGING$CALLER_1 = this.$CAPACITY_USE$IO_SARL_CORE_LOGGING$CALLER();
-    _$CAPACITY_USE$IO_SARL_CORE_LOGGING$CALLER_1.info("The agent was started.");
     DefaultContextInteractions _$CAPACITY_USE$IO_SARL_CORE_DEFAULTCONTEXTINTERACTIONS$CALLER = this.$CAPACITY_USE$IO_SARL_CORE_DEFAULTCONTEXTINTERACTIONS$CALLER();
     AgentIsReady _agentIsReady = new AgentIsReady();
     _$CAPACITY_USE$IO_SARL_CORE_DEFAULTCONTEXTINTERACTIONS$CALLER.emit(_agentIsReady);
@@ -115,12 +113,12 @@ public class ACOAgent extends Agent {
         probabilities = _$CAPACITY_USE$FR_UTBM_IA54_ACOTSP_PROBABILITIESCOMPUTATION$CALLER.probabilitiesComputation(this.currentCity, probabilities, this.visitedCities, this.visitedClusters, 
           this.pheromones);
         int nextVisitedCity = probabilities.indexOf(IterableExtensions.<Double>max(probabilities));
+        HashSet<Integer> set = new HashSet<Integer>(this.visitedCities);
         Float _get = this.acoParameters.getDistances().get(((this.currentCity) == null ? 0 : (this.currentCity).intValue())).get(nextVisitedCity);
         this.currentPathLength = Float.valueOf((((this.currentPathLength) == null ? 0 : (this.currentPathLength).floatValue()) + ((_get) == null ? 0 : (_get).floatValue())));
         this.currentCity = Integer.valueOf(nextVisitedCity);
         this.visitedCities.add(Integer.valueOf(nextVisitedCity));
         this.visitedClusters.add(this.acoParameters.getAttachedCluster().get(nextVisitedCity));
-        HashSet<Integer> set = new HashSet<Integer>(this.visitedCities);
       }
     }
     Float _get = this.acoParameters.getDistances().get(((this.currentCity) == null ? 0 : (this.currentCity).intValue())).get(((this.startingCity) == null ? 0 : (this.startingCity).intValue()));

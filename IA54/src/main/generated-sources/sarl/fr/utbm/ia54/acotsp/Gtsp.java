@@ -141,7 +141,7 @@ public class Gtsp {
 		/* Load Node_dist_section*/
 		this.loadGtspNodeDist();
 		
-		System.out.println("Le fichier GTSP est chargé");
+//		System.out.println("Le fichier GTSP est chargé");
 	}
 	
 	
