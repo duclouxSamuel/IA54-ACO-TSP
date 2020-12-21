@@ -94,7 +94,8 @@ public class ACOManager extends Agent {
         Float pathLength = occurrence.pathLength;
         Random generator = new Random();
         int _nextInt = generator.nextInt(100);
-        if ((_nextInt < 15)) {
+        Float _probabilityOfMutation = this.acoParameters.getProbabilityOfMutation();
+        if ((_nextInt < (((_probabilityOfMutation) == null ? 0 : (_probabilityOfMutation).floatValue()) * 100))) {
           path = this.mutation(path);
           pathLength = Float.valueOf(this.computePathLength(path));
         }
@@ -107,7 +108,8 @@ public class ACOManager extends Agent {
             this.currentBestPathLength = pathLength;
           }
           this.numberOfIterationsDone++;
-          if ((this.numberOfIterationsWithoutChanges.intValue() > 15)) {
+          Integer _frequencyOfMutation = this.acoParameters.getFrequencyOfMutation();
+          if ((this.numberOfIterationsWithoutChanges.intValue() > _frequencyOfMutation.doubleValue())) {
             this.numberOfIterationsWithoutChanges = Integer.valueOf(0);
             ArrayList<ArrayList<Integer>> newPaths = new ArrayList<ArrayList<Integer>>();
             ArrayList<Float> newPathsLength = new ArrayList<Float>();

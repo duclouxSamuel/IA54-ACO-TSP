@@ -45,12 +45,14 @@ public class GUIAgent extends Agent {
       float visibilityRegulationFactor = 1.25f;
       int nunberOfAnts = 70;
       int numberOfIterations = 100;
+      int frequencyOfMutation = 15;
+      float probabilityOfMutation = 0.15f;
       int _dimension = gtsp.getDimension();
       int _groupDimension = gtsp.getGroupDimension();
       ArrayList<ArrayList<Float>> _convertToFloatArrayList = this.convertToFloatArrayList(gtsp.getNode_dist());
       ArrayList<ArrayList<Float>> _convertToFloatArrayList_1 = this.convertToFloatArrayList(gtsp.getNode_coord_section());
       ArrayList<Integer> _convertToIntegerArrayList = this.convertToIntegerArrayList(gtsp.getGroup_list());
-      ACOParameters acoParameters = new ACOParameters(Integer.valueOf(_dimension), Integer.valueOf(_groupDimension), _convertToFloatArrayList, _convertToFloatArrayList_1, _convertToIntegerArrayList, Float.valueOf(pheromoneEvaporationFactor), Float.valueOf(pheromoneRegulationFactor), Float.valueOf(visibilityRegulationFactor), Integer.valueOf(nunberOfAnts), Integer.valueOf(numberOfIterations));
+      ACOParameters acoParameters = new ACOParameters(Integer.valueOf(_dimension), Integer.valueOf(_groupDimension), _convertToFloatArrayList, _convertToFloatArrayList_1, _convertToIntegerArrayList, Float.valueOf(pheromoneEvaporationFactor), Float.valueOf(pheromoneRegulationFactor), Float.valueOf(visibilityRegulationFactor), Integer.valueOf(nunberOfAnts), Integer.valueOf(numberOfIterations), Integer.valueOf(frequencyOfMutation), Float.valueOf(probabilityOfMutation));
       DefaultContextInteractions _$CAPACITY_USE$IO_SARL_CORE_DEFAULTCONTEXTINTERACTIONS$CALLER = this.$CAPACITY_USE$IO_SARL_CORE_DEFAULTCONTEXTINTERACTIONS$CALLER();
       NewOptimization _newOptimization = new NewOptimization(acoParameters);
       _$CAPACITY_USE$IO_SARL_CORE_DEFAULTCONTEXTINTERACTIONS$CALLER.emit(_newOptimization);

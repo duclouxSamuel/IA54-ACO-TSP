@@ -67,7 +67,7 @@ agent ACOManager {
 				var path = occurrence.path
 				var pathLength = occurrence.pathLength
 				var generator = new Random()
-				if (generator.nextInt(100) < 15) {
+				if (generator.nextInt(100) < acoParameters.probabilityOfMutation*100) {
 					path = mutation(path)
 					pathLength = computePathLength(path)
 				}
@@ -77,7 +77,7 @@ agent ACOManager {
 					if (numberOfIterationsDone == 0)
 						currentBestPathLength = pathLength
 					numberOfIterationsDone++
-					if (numberOfIterationsWithoutChanges > 15) {
+					if (numberOfIterationsWithoutChanges > acoParameters.frequencyOfMutation) {
 						numberOfIterationsWithoutChanges = 0
 						var newPaths = new ArrayList<ArrayList<Integer>>
 						var newPathsLength = new ArrayList<Float>

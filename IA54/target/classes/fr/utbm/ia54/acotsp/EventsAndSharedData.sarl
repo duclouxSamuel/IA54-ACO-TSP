@@ -6,7 +6,6 @@ package fr.utbm.ia54.acotsp
 import org.eclipse.xtend.lib.annotations.Accessors
 import java.util.ArrayList
 
-
 /** 
  * @author yaben
  * 
@@ -106,10 +105,19 @@ class ACOParameters {
 	@Accessors
 	var numberOfIterations : Integer
 
+	// Fréquence (nb d'itérations) des grosses mutations
+	@Accessors
+	var frequencyOfMutation : Integer
+
+	// Probabilité de la petite mutation
+	@Accessors
+	var probabilityOfMutation : Float
+
 	new (inumberOfCities : Integer, inumberOfClusters : Integer, idistances : ArrayList<ArrayList<Float>>,
 		ipositions : ArrayList<ArrayList<Float>>, iattachedCluster : ArrayList<Integer>,
 		ipheromoneEvaporationFactor : Float, ipheromoneRegulationFactor : Float, ivisibilityRegulationFactor : Float,
-		inumberOfAnts : Integer, inumberOfIterations : Integer) {
+		inumberOfAnts : Integer, inumberOfIterations : Integer, ifrequencyOfMutation : Integer,
+		iprobabilityOfMutation : Float) {
 		numberOfCities = inumberOfCities
 		numberOfClusters = inumberOfClusters
 		distances = idistances
@@ -120,6 +128,8 @@ class ACOParameters {
 		visibilityRegulationFactor = ivisibilityRegulationFactor
 		numberOfAnts = inumberOfAnts
 		numberOfIterations = inumberOfIterations
+		frequencyOfMutation = ifrequencyOfMutation
+		probabilityOfMutation = iprobabilityOfMutation
 	}
 
 	new (acoParameters : ACOParameters) {

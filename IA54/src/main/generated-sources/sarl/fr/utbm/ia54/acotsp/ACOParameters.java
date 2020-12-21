@@ -42,7 +42,13 @@ public class ACOParameters {
   @Accessors
   private Integer numberOfIterations;
   
-  public ACOParameters(final Integer inumberOfCities, final Integer inumberOfClusters, final ArrayList<ArrayList<Float>> idistances, final ArrayList<ArrayList<Float>> ipositions, final ArrayList<Integer> iattachedCluster, final Float ipheromoneEvaporationFactor, final Float ipheromoneRegulationFactor, final Float ivisibilityRegulationFactor, final Integer inumberOfAnts, final Integer inumberOfIterations) {
+  @Accessors
+  private Integer frequencyOfMutation;
+  
+  @Accessors
+  private Float probabilityOfMutation;
+  
+  public ACOParameters(final Integer inumberOfCities, final Integer inumberOfClusters, final ArrayList<ArrayList<Float>> idistances, final ArrayList<ArrayList<Float>> ipositions, final ArrayList<Integer> iattachedCluster, final Float ipheromoneEvaporationFactor, final Float ipheromoneRegulationFactor, final Float ivisibilityRegulationFactor, final Integer inumberOfAnts, final Integer inumberOfIterations, final Integer ifrequencyOfMutation, final Float iprobabilityOfMutation) {
     this.numberOfCities = inumberOfCities;
     this.numberOfClusters = inumberOfClusters;
     this.distances = idistances;
@@ -53,6 +59,8 @@ public class ACOParameters {
     this.visibilityRegulationFactor = ivisibilityRegulationFactor;
     this.numberOfAnts = inumberOfAnts;
     this.numberOfIterations = inumberOfIterations;
+    this.frequencyOfMutation = ifrequencyOfMutation;
+    this.probabilityOfMutation = iprobabilityOfMutation;
   }
   
   public ACOParameters(final ACOParameters acoParameters) {
@@ -125,6 +133,19 @@ public class ACOParameters {
       return false;
     if (other.numberOfIterations != null && other.numberOfIterations.intValue() != this.numberOfIterations.intValue())
       return false;
+    if (other.frequencyOfMutation == null) {
+      if (this.frequencyOfMutation != null)
+        return false;
+    } else if (this.frequencyOfMutation == null)
+      return false;
+    if (other.frequencyOfMutation != null && other.frequencyOfMutation.intValue() != this.frequencyOfMutation.intValue())
+      return false;
+    if (other.probabilityOfMutation == null) {
+      if (this.probabilityOfMutation != null)
+        return false;
+    } else if (this.probabilityOfMutation == null)
+      return false;if (other.probabilityOfMutation != null && Float.floatToIntBits(other.probabilityOfMutation.floatValue()) != Float.floatToIntBits(this.probabilityOfMutation.floatValue()))
+      return false;
     return super.equals(obj);
   }
   
@@ -141,6 +162,8 @@ public class ACOParameters {
     result = prime * result + Objects.hashCode(this.visibilityRegulationFactor);
     result = prime * result + Objects.hashCode(this.numberOfAnts);
     result = prime * result + Objects.hashCode(this.numberOfIterations);
+    result = prime * result + Objects.hashCode(this.frequencyOfMutation);
+    result = prime * result + Objects.hashCode(this.probabilityOfMutation);
     return result;
   }
   
@@ -232,5 +255,23 @@ public class ACOParameters {
   
   public void setNumberOfIterations(final Integer numberOfIterations) {
     this.numberOfIterations = numberOfIterations;
+  }
+  
+  @Pure
+  public Integer getFrequencyOfMutation() {
+    return this.frequencyOfMutation;
+  }
+  
+  public void setFrequencyOfMutation(final Integer frequencyOfMutation) {
+    this.frequencyOfMutation = frequencyOfMutation;
+  }
+  
+  @Pure
+  public Float getProbabilityOfMutation() {
+    return this.probabilityOfMutation;
+  }
+  
+  public void setProbabilityOfMutation(final Float probabilityOfMutation) {
+    this.probabilityOfMutation = probabilityOfMutation;
   }
 }
