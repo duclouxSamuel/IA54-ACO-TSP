@@ -66,9 +66,9 @@ public class ACOManager extends Agent {
   
   private void $behaviorUnit$Initialize$0(final Initialize occurrence) {
     Logging _$CAPACITY_USE$IO_SARL_CORE_LOGGING$CALLER = this.$CAPACITY_USE$IO_SARL_CORE_LOGGING$CALLER();
-    _$CAPACITY_USE$IO_SARL_CORE_LOGGING$CALLER.info("The agent was started.");
+    _$CAPACITY_USE$IO_SARL_CORE_LOGGING$CALLER.setLoggingName("ACOManager");
     Logging _$CAPACITY_USE$IO_SARL_CORE_LOGGING$CALLER_1 = this.$CAPACITY_USE$IO_SARL_CORE_LOGGING$CALLER();
-    _$CAPACITY_USE$IO_SARL_CORE_LOGGING$CALLER_1.setLoggingName("ACOManager");
+    _$CAPACITY_USE$IO_SARL_CORE_LOGGING$CALLER_1.info("The agent was started.");
   }
   
   private void $behaviorUnit$Destroy$1(final Destroy occurrence) {
@@ -78,12 +78,11 @@ public class ACOManager extends Agent {
   
   private void $behaviorUnit$NewOptimization$2(final NewOptimization occurrence) {
     Logging _$CAPACITY_USE$IO_SARL_CORE_LOGGING$CALLER = this.$CAPACITY_USE$IO_SARL_CORE_LOGGING$CALLER();
-    _$CAPACITY_USE$IO_SARL_CORE_LOGGING$CALLER.info("J\'ai recu l\'ordre d\'une nouvelle optim");
+    _$CAPACITY_USE$IO_SARL_CORE_LOGGING$CALLER.info("Nouvelle optimisation");
     this.acoParameters = occurrence.acoParameters;
     this.numberOfIterationsDone = Integer.valueOf(0);
     this.numberOfIterationsWithoutChanges = Integer.valueOf(0);
-    Float _float = new Float(999999);
-    this.currentBestPathLength = _float;
+    this.currentBestPathLength = Float.valueOf(0f);
     this.initializePheromones();
     this.launchACOAgents();
   }
@@ -93,21 +92,27 @@ public class ACOManager extends Agent {
       synchronized (this.pathsLength) {
         ArrayList<Integer> path = occurrence.path;
         Float pathLength = occurrence.pathLength;
+        Random generator = new Random();
+        int _nextInt = generator.nextInt(100);
+        if ((_nextInt < 15)) {
+          path = this.mutation(path);
+          pathLength = Float.valueOf(this.computePathLength(path));
+        }
         this.paths.add(path);
         this.pathsLength.add(pathLength);
         int _size = this.paths.size();
         Integer _numberOfAnts = this.acoParameters.getNumberOfAnts();
         if ((_size == ((_numberOfAnts) == null ? 0 : (_numberOfAnts).intValue()))) {
-          this.pheromones = this.updatePheromones();
+          if ((this.numberOfIterationsDone != null && (this.numberOfIterationsDone.intValue() == 0))) {
+            this.currentBestPathLength = pathLength;
+          }
           this.numberOfIterationsDone++;
           if ((this.numberOfIterationsWithoutChanges.intValue() > 15)) {
+            this.numberOfIterationsWithoutChanges = Integer.valueOf(0);
             ArrayList<ArrayList<Integer>> newPaths = new ArrayList<ArrayList<Integer>>();
             ArrayList<Float> newPathsLength = new ArrayList<Float>();
-            Logging _$CAPACITY_USE$IO_SARL_CORE_LOGGING$CALLER = this.$CAPACITY_USE$IO_SARL_CORE_LOGGING$CALLER();
-            _$CAPACITY_USE$IO_SARL_CORE_LOGGING$CALLER.info("Mutation");
             for (final ArrayList<Integer> p : this.paths) {
               {
-                Random generator = new Random();
                 ArrayList<Integer> newPath = this.mutation(p);
                 float newPathLength = this.computePathLength(newPath);
                 newPaths.add(newPath);
@@ -116,16 +121,16 @@ public class ACOManager extends Agent {
             }
             this.paths = newPaths;
             this.pathsLength = newPathsLength;
-            this.initializePheromones();
           }
+          this.pheromones = this.updatePheromones();
           Float _get = this.pathsLength.get(this.pathsLength.indexOf(IterableExtensions.<Float>min(this.pathsLength)));
           if ((_get.floatValue() < this.currentBestPathLength.doubleValue())) {
             this.currentBestPath = this.paths.get(this.pathsLength.indexOf(IterableExtensions.<Float>min(this.pathsLength)));
             this.currentBestPathLength = this.pathsLength.get(this.pathsLength.indexOf(IterableExtensions.<Float>min(this.pathsLength)));
             this.numberOfIterationsWithoutChanges = Integer.valueOf(0);
-            Logging _$CAPACITY_USE$IO_SARL_CORE_LOGGING$CALLER_1 = this.$CAPACITY_USE$IO_SARL_CORE_LOGGING$CALLER();
+            Logging _$CAPACITY_USE$IO_SARL_CORE_LOGGING$CALLER = this.$CAPACITY_USE$IO_SARL_CORE_LOGGING$CALLER();
             String _string = this.currentBestPath.toString();
-            _$CAPACITY_USE$IO_SARL_CORE_LOGGING$CALLER_1.info(
+            _$CAPACITY_USE$IO_SARL_CORE_LOGGING$CALLER.info(
               ((((("Itération : " + this.numberOfIterationsDone) + " Meilleur chemin : ") + this.currentBestPathLength) + 
                 " Parcours : ") + _string));
           } else {
@@ -136,9 +141,9 @@ public class ACOManager extends Agent {
             DefaultContextInteractions _$CAPACITY_USE$IO_SARL_CORE_DEFAULTCONTEXTINTERACTIONS$CALLER = this.$CAPACITY_USE$IO_SARL_CORE_DEFAULTCONTEXTINTERACTIONS$CALLER();
             OptimizationFinished _optimizationFinished = new OptimizationFinished(this.pheromones, this.currentBestPath, this.currentBestPathLength);
             _$CAPACITY_USE$IO_SARL_CORE_DEFAULTCONTEXTINTERACTIONS$CALLER.emit(_optimizationFinished);
-            Logging _$CAPACITY_USE$IO_SARL_CORE_LOGGING$CALLER_2 = this.$CAPACITY_USE$IO_SARL_CORE_LOGGING$CALLER();
+            Logging _$CAPACITY_USE$IO_SARL_CORE_LOGGING$CALLER_1 = this.$CAPACITY_USE$IO_SARL_CORE_LOGGING$CALLER();
             String _string_1 = this.currentBestPath.toString();
-            _$CAPACITY_USE$IO_SARL_CORE_LOGGING$CALLER_2.info((((("Fin d\'optimisation  " + "meilleur chemin : ") + this.currentBestPathLength) + " parcours") + _string_1));
+            _$CAPACITY_USE$IO_SARL_CORE_LOGGING$CALLER_1.info((((("Fin d\'optimisation  " + "meilleur chemin : ") + this.currentBestPathLength) + " parcours") + _string_1));
           } else {
             this.launchIteration();
           }
@@ -235,8 +240,12 @@ public class ACOManager extends Agent {
             Float _get = this.pheromones.get(i).get(j);
             float _sumOfPheromoneDeltaComputation = this.sumOfPheromoneDeltaComputation(Integer.valueOf(i), Integer.valueOf(j));
             float newValue = ((((_pheromoneEvaporationFactor) == null ? 0 : (_pheromoneEvaporationFactor).floatValue()) * ((_get) == null ? 0 : (_get).floatValue())) + _sumOfPheromoneDeltaComputation);
-            if (((newValue < 1e-32) || (i == j))) {
-              newValue = 0f;
+            if ((newValue < 1e-45)) {
+              newValue = 1e-45f;
+            } else {
+              if ((i == j)) {
+                newValue = 0f;
+              }
             }
             temp.add(Float.valueOf(newValue));
           }
@@ -249,7 +258,7 @@ public class ACOManager extends Agent {
   
   protected ArrayList<ArrayList<Float>> updatePheromonesWithMutation() {
     ArrayList<ArrayList<Float>> newPheromones = new ArrayList<ArrayList<Float>>();
-    float minPheromones = 99999f;
+    float minPheromones = 0f;
     Pair<Integer, Integer> minPheromonesIndex = new Pair<Integer, Integer>(Integer.valueOf(0), Integer.valueOf(0));
     float maxPheromones = 0f;
     Pair<Integer, Integer> maxPheromonesIndex = new Pair<Integer, Integer>(Integer.valueOf(0), Integer.valueOf(0));
@@ -262,8 +271,15 @@ public class ACOManager extends Agent {
             Float _get = this.pheromones.get(i).get(j);
             float _sumOfPheromoneDeltaComputation = this.sumOfPheromoneDeltaComputation(Integer.valueOf(i), Integer.valueOf(j));
             float newValue = ((((_pheromoneEvaporationFactor) == null ? 0 : (_pheromoneEvaporationFactor).floatValue()) * ((_get) == null ? 0 : (_get).floatValue())) + _sumOfPheromoneDeltaComputation);
-            if (((newValue < 1e-32) || (i == j))) {
-              newValue = 0f;
+            if (((i == 0) && (j == 1))) {
+              minPheromones = newValue;
+            }
+            if ((newValue < 1e-45)) {
+              newValue = 1e-45f;
+            } else {
+              if ((i == j)) {
+                newValue = 0f;
+              }
             }
             temp.add(Float.valueOf(newValue));
             if (((newValue < minPheromones) && (newValue > 0f))) {

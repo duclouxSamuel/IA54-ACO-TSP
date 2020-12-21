@@ -43,8 +43,8 @@ agent ACOManager {
 	var acoAgentsReady : ArrayList<UUID>
 
 	on Initialize {
-		info("The agent was started.")
 		loggingName = "ACOManager"
+		info("The agent was started.")
 	}
 
 	on Destroy {
@@ -52,11 +52,11 @@ agent ACOManager {
 	}
 
 	on NewOptimization {
-		info("J'ai recu l'ordre d'une nouvelle optim")
+		info("Nouvelle optimisation")
 		acoParameters = occurrence.acoParameters as ACOParameters
 		numberOfIterationsDone = 0
 		numberOfIterationsWithoutChanges = 0
-		currentBestPathLength = new Float(999999)
+		currentBestPathLength = 0f
 		initializePheromones()
 		launchACOAgents()
 	}
@@ -66,39 +66,32 @@ agent ACOManager {
 			synchronized (pathsLength) {
 				var path = occurrence.path
 				var pathLength = occurrence.pathLength
-				// var set = new HashSet<Integer>(path);
-				// if (set.size() < path.size()) {
-				// info('ALERT DUPLICATE ')
-				// info('Path vs occurence path : ' + path + occurrence.path)
-				// info('Pheromones :' + pheromones)
-				// }
+				var generator = new Random()
+				if (generator.nextInt(100) < 15) {
+					path = mutation(path)
+					pathLength = computePathLength(path)
+				}
 				paths.add(path)
 				pathsLength.add(pathLength)
 				if (paths.size() === acoParameters.numberOfAnts) {
-					pheromones = updatePheromones()
-					// info('Phéromones : ' + pheromones)
+					if (numberOfIterationsDone == 0)
+						currentBestPathLength = pathLength
 					numberOfIterationsDone++
 					if (numberOfIterationsWithoutChanges > 15) {
-//						numberOfIterationsWithoutChanges = 0
+						numberOfIterationsWithoutChanges = 0
 						var newPaths = new ArrayList<ArrayList<Integer>>
 						var newPathsLength = new ArrayList<Float>
-						info('Mutation')
+						// info('Mutation')
 						for (p : paths) {
-							var generator = new Random()
-//							if (generator.nextInt(100 + 1) < 50) {
-								var newPath = mutation(p)
-								var newPathLength = computePathLength(newPath)
-								newPaths.add(newPath)
-								newPathsLength.add(newPathLength)
-//							} else {
-//								newPaths.add(p)
-//								newPathsLength.add(computePathLength(p))
-//							}
+							var newPath = mutation(p)
+							var newPathLength = computePathLength(newPath)
+							newPaths.add(newPath)
+							newPathsLength.add(newPathLength)
 						}
 						paths = newPaths
 						pathsLength = newPathsLength
-						initializePheromones()					
 					}
+					pheromones = updatePheromones()
 					if (pathsLength.get(pathsLength.indexOf(pathsLength.min())) < currentBestPathLength) {
 						currentBestPath = paths.get(pathsLength.indexOf(pathsLength.min()))
 						currentBestPathLength = pathsLength.get(pathsLength.indexOf(pathsLength.min()))
@@ -166,7 +159,9 @@ agent ACOManager {
 			for (var j = 0; j < acoParameters.numberOfCities; j++) {
 				var newValue = acoParameters.pheromoneEvaporationFactor * pheromones.get(i).get(j) +
 					sumOfPheromoneDeltaComputation(i, j)
-				if (newValue < 1e-32 || i == j) {
+				if (newValue < 1e-45) {
+					newValue = 1e-45f
+				} else if (i == j) {
 					newValue = 0f
 				}
 				temp.add(newValue)
@@ -178,7 +173,7 @@ agent ACOManager {
 
 	def updatePheromonesWithMutation() {
 		var newPheromones = new ArrayList<ArrayList<Float>>
-		var minPheromones = 99999f
+		var minPheromones = 0f
 		var minPheromonesIndex = new Pair<Integer, Integer>(0, 0)
 		var maxPheromones = 0f
 		var maxPheromonesIndex = new Pair<Integer, Integer>(0, 0)
@@ -187,7 +182,11 @@ agent ACOManager {
 			for (var j = 0; j < acoParameters.numberOfCities; j++) {
 				var newValue = acoParameters.pheromoneEvaporationFactor * pheromones.get(i).get(j) +
 					sumOfPheromoneDeltaComputation(i, j)
-				if (newValue < 1e-32 || i == j) {
+				if (i == 0 && j == 1)
+					minPheromones = newValue
+				if (newValue < 1e-45) {
+					newValue = 1e-45f
+				} else if (i == j) {
 					newValue = 0f
 				}
 				temp.add(newValue)
@@ -262,11 +261,8 @@ agent ACOManager {
 			if (acoParameters.attachedCluster.get(i) == acoParameters.attachedCluster.get(t))
 				temp.add(i)
 		}
-
 		var s = temp.get(generator.nextInt(temp.size))
-//		info(t + ' is replace by ' + s + ' in path : ' + path.toString)
 		path.set(path.indexOf(t), s)
-		// info(' new path : ' + path)
 		return path
 	}
 

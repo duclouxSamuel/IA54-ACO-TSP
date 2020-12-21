@@ -52,7 +52,7 @@ agent ACOAgent {
 				acoParameters.attachedCluster, acoParameters.pheromoneRegulationFactor,
 				acoParameters.visibilityRegulationFactor), ProbabilitiesComputation)
 		loggingName = "ACOAgent starting at " + startingCity
-//		info("The agent was started.")
+		// info("The agent was started.")
 		emit(new AgentIsReady)
 	}
 
@@ -77,25 +77,15 @@ agent ACOAgent {
 			var probabilities = new ArrayList<Double>
 			probabilities = probabilitiesComputation(currentCity, probabilities, visitedCities, visitedClusters,
 				pheromones)
-//			 if (startingCity == 0) {
-////				info(probabilities.toString)
-//			 	info(pheromones)
-//			 }
 			var nextVisitedCity = probabilities.indexOf(probabilities.max())
-			var set = new HashSet<Integer>(visitedCities);
-			// if (set.size() < visitedCities.size()) {
-			// info('ALERT DUPLICATE ')
-// info('Probabilities' + probabilities)
-			// info('Visited clusters : ' + visitedClusters)
-			// info('Visited cities : ' + visitedCities)
-			// info('Pheromones :' + pheromones)
-			// }
-//			if (visitedCities.contains(nextVisitedCity)) {
+//			if (visitedClusters.contains(acoParameters.attachedCluster.get(nextVisitedCity))) {
 //				info('ALERT DUPLICATE ')
 //				info('Probabilities' + probabilities)
 //				info('Visited clusters : ' + visitedClusters)
 //				info('Visited cities : ' + visitedCities)
-//				info('Pheromones :' + pheromones)
+//				info('Pheromones :' + pheromones.get(currentCity))
+//				probabilities = probabilitiesComputation(currentCity, probabilities, visitedCities, visitedClusters,
+//					pheromones)
 //			}
 			currentPathLength = currentPathLength + acoParameters.distances.get(currentCity).get(nextVisitedCity)
 			currentCity = nextVisitedCity
@@ -103,8 +93,6 @@ agent ACOAgent {
 			visitedClusters.add(acoParameters.attachedCluster.get(nextVisitedCity))
 		}
 		currentPathLength = currentPathLength + acoParameters.distances.get(currentCity).get(startingCity)
-		// if(startingCity == 9)
-		// info('Path :' + currentPathLength + ' ' + visitedCities.toString)
 	}
 
 	on Destroy {

@@ -23,7 +23,6 @@ import io.sarl.lang.core.BuiltinCapacitiesProvider;
 import io.sarl.lang.core.DynamicSkillProvider;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
@@ -113,7 +112,6 @@ public class ACOAgent extends Agent {
         probabilities = _$CAPACITY_USE$FR_UTBM_IA54_ACOTSP_PROBABILITIESCOMPUTATION$CALLER.probabilitiesComputation(this.currentCity, probabilities, this.visitedCities, this.visitedClusters, 
           this.pheromones);
         int nextVisitedCity = probabilities.indexOf(IterableExtensions.<Double>max(probabilities));
-        HashSet<Integer> set = new HashSet<Integer>(this.visitedCities);
         Float _get = this.acoParameters.getDistances().get(((this.currentCity) == null ? 0 : (this.currentCity).intValue())).get(nextVisitedCity);
         this.currentPathLength = Float.valueOf((((this.currentPathLength) == null ? 0 : (this.currentPathLength).floatValue()) + ((_get) == null ? 0 : (_get).floatValue())));
         this.currentCity = Integer.valueOf(nextVisitedCity);
