@@ -1,4 +1,5 @@
 package fr.utbm.ia54.acotsp;
+
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
@@ -21,13 +22,17 @@ public class Gtsp {
 
 	private float[][] nodeDist; /* Matrice de distances */
 	
+	private   double     bbx, bby;/* bounding box of vertices */
+	  
+	private   double     bbw, bbh;/* (position and width and height) */
+	
+	private   boolean    valid;   /* flag for valid bounding box */	
+	
 	
 	/** Initializers **/
 	
 	public Gtsp() {	}
 	
-	
-	//Recommandé d'initialiser par cette méthode
 	public Gtsp(File file) throws IOException {
 		this.load(file);
 	}
@@ -92,7 +97,7 @@ public class Gtsp {
 		this.groupDimension = groupDimension;
 	}
 
-	
+
 	/** Methodes **/
 	
 	/* Charge un fichier tsp dans l'objet GTSP */
@@ -107,12 +112,10 @@ public class Gtsp {
 				line = line.trim();
 				
 				if (line.equals("GTSP_SET_SECTION:")) {
-					
 					/* Load Group_list */
 					this.loadGtspSetSection(reader);
 					
 				} else if (line.equals("NODE_COORD_SECTION")) {	
-					
 					/* Load node_coord_section */
 					this.loadNodeCoordSection(reader);
 					
@@ -142,6 +145,8 @@ public class Gtsp {
 		this.loadGtspNodeDist();
 		
 //		System.out.println("Le fichier GTSP est chargé");
+//		System.out.println("Nombre de groupes :" + groupDimension);
+//		System.out.println("Nombre de villes :" + dimension);
 	}
 	
 	
@@ -183,6 +188,7 @@ public class Gtsp {
 			if(line.equals("EOF")) {
 				break;
 			}
+
 			String[] tokens = line.trim().split("\\s");
 			
 			int i = 1;
@@ -197,7 +203,9 @@ public class Gtsp {
 			clusterId++;
 		}
 		groupList = groupListTemp;
-		setGroupDimension(clusterId - 1);
+		groupDimension = clusterId-1;
+	
+		
 	}
 	
 	/* Initialise la matrice des distances dans le GTSP */
@@ -225,5 +233,47 @@ public class Gtsp {
 		
 		nodeDist = distances;
 		
+	}
+	
+	private void bbox ()
+	{                             /* --- compute bounding box */
+	    int    i;                   /* loop variable */
+	    double x, y;                /* coordinates of a vertex */
+	    double xmax, ymax;          /* maximal x- and y-coordinates */
+
+	    this.bbx = Double.MAX_VALUE; xmax = -Double.MAX_VALUE;
+	    this.bby = Double.MAX_VALUE; ymax = -Double.MAX_VALUE;
+	    for (i = this.nodeCoordSection.length; --i >= 0; ) {
+	      x = this.nodeCoordSection[i][0];          /* traverse the vertices */
+	      y = this.nodeCoordSection[i][1];          /* of the problem */
+	      if (x < this.bbx) this.bbx = x;
+	      if (x > xmax)     xmax     = x;
+	      if (y < this.bby) this.bby = y;
+	      if (y > ymax)     ymax     = y;
+	    }                           /* find minimum and maximum coords. */
+	    this.bbw = xmax -this.bbx;  /* compute the width and height */
+	    this.bbh = ymax -this.bby;  /* of the bounding box */
+	    this.valid = true;          /* the bounding box is now valid */
+	  }  /* bbox() */
+
+
+	  public double getX ()
+	  { if (!this.valid) this.bbox(); return this.bbx; }
+
+	  public double getY ()
+	  { if (!this.valid) this.bbox(); return this.bby; }
+
+	  public double getWidth ()
+	  { if (!this.valid) this.bbox(); return this.bbw; }
+
+	  public double getHeight ()
+	  { if (!this.valid) this.bbox(); return this.bbh; }
+
+	public double getX(int i) {
+		return this.nodeCoordSection[i][0];
+	}
+
+	public double getY(int i) {
+		return this.nodeCoordSection[i][1];
 	}
 }
