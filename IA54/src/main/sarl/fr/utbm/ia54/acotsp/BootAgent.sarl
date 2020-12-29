@@ -7,21 +7,36 @@ import io.sarl.core.Destroy
 import io.sarl.core.Initialize
 import io.sarl.core.Logging
 import io.sarl.core.Lifecycle
+import io.sarl.lang.core.Event
+import gui.GUI
 
 /** 
  * @author Omen
  * 
  */
-agent BootAgent {
+@SuppressWarnings("potential_field_synchronization_problem")
+	agent BootAgent {
 	uses Logging, Lifecycle
 
+	var gui : GUI
+	
 	on Initialize {
+		gui = new GUI()
+		gui.setVisible(true)
+
 		info("The agent was started.")
 		spawn(ACOManager)
-		spawn(GUIAgent)
+		spawn(GUIAgent)	
 	}
 
 	on Destroy {
 		info("The agent was stopped.")
 	}
+
+	def receiveEvent(^event : Event) {
+		if (^event instanceof GuiRepaint) { // event from the environment, GUI must be refreshed
+			this.gui.repaint()
+		}
+	}
+
 }

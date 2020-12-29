@@ -1,0 +1,15 @@
+package fr.utbm.ia54.acotsp
+
+import gui.GUI
+
+class Launcher{
+	
+	static def main(args : String*){
+		
+		var gui : GUI = new GUI()
+		
+		gui.setVisible(true)
+		
+	}
+	
+}

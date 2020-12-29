@@ -1,1 +1,44 @@
 package gui
+
+import fr.utbm.ia54.acotsp.gui.GuiPanel
+import java.util.ArrayList
+import io.sarl.bootstrap.SREBootstrap
+import io.sarl.bootstrap.SRE
+import io.sarl.lang.core.AgentContext
+import java.util.UUID
+import io.sarl.lang.core.EventSpace
+
+class GUI extends GuiPanel {
+
+			/** 
+		 * SRE Kernel instance
+		 */
+	var kernel : SREBootstrap
+
+	/** 
+	 * The default SARL context where environment and boids are spawned
+	 */
+	var defaultSARLContext : AgentContext
+
+	/** 
+	 * Identifier of the environment
+	 */
+	var environment : UUID
+	
+	def repaint(pheromones : ArrayList<ArrayList<Float>>, bestPath : ArrayList<Integer> , bestPathLength : Float ){
+		this.panel.setBestTour(bestPath)
+		this.panel.setPheromones(pheromones)
+		this.setStatus("Best path length is : " + bestPathLength.toString())
+		this.panel.repaint()
+	}
+	
+	@Override
+	def runOptimization() {
+
+	//TODO Emit NewOptimization() event		
+		
+	}
+
+	
+
+}

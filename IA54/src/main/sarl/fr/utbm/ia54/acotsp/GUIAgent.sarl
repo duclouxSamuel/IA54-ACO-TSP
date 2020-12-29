@@ -3,12 +3,15 @@ package fr.utbm.ia54.acotsp
 /** 
  * 
  */
+
+import gui.GUI
+import io.sarl.core.DefaultContextInteractions
 import io.sarl.core.Destroy
 import io.sarl.core.Initialize
 import io.sarl.core.Logging
-import io.sarl.core.DefaultContextInteractions
 import java.io.File
 import java.util.ArrayList
+import io.sarl.lang.core.Event
 
 /** 
  * @author Omen
@@ -17,8 +20,13 @@ import java.util.ArrayList
 agent GUIAgent {
 	uses Logging, DefaultContextInteractions
 
+	
+	
 	on Initialize {
+
 		info("The agent was started.")
+
+
 		var gtsp = new Gtsp(new File('data/instances/20kroA100.txt'))
 		var pheromoneEvaporationFactor = 0.1f
 		var pheromoneRegulationFactor = 1f
@@ -50,9 +58,14 @@ agent GUIAgent {
 		info("The agent was stopped.")
 	}
 
+	@SuppressWarnings("discouraged_occurrence_readonly_use")
 	on OptimizationFinished {
-		new GuiRepaint(occurrence.pheromones, occurrence.bestPath, occurrence.bestPathLength).emit
+		
+		
+		emit(new GuiRepaint(occurrence.pheromones, occurrence.bestPath, occurrence.bestPathLength))
+		
 	}
+		
 
 	def convertToFloatArrayList(array : float[][]) : ArrayList<ArrayList<Float>> {
 		var response = new ArrayList<ArrayList<Float>>
@@ -73,5 +86,6 @@ agent GUIAgent {
 		}
 		return response
 	}
+
 
 }
