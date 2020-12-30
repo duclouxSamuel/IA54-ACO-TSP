@@ -150,7 +150,7 @@ public class GuiPanel extends JFrame
 		  g.setConstraints(lbl,  lc);
 		  grid.add(lbl);
 		  final JSpinner numberOfIterations = new JSpinner(
-				  new SpinnerNumberModel(30, 1, 999999, 1));
+				  new SpinnerNumberModel(100, 1, 999999, 1));
 		  g.setConstraints(numberOfIterations, rc);
 		  grid.add(numberOfIterations);
 		  
@@ -166,35 +166,35 @@ public class GuiPanel extends JFrame
 		  g.setConstraints(lbl,  lc);
 		  grid.add(lbl);
 		  final JSpinner mutationFrequency = new JSpinner(
-				  new SpinnerNumberModel(20, 1, 999999, 1));
+				  new SpinnerNumberModel(15, 1, 999999, 1));
 		  g.setConstraints(mutationFrequency, rc);
 		  grid.add(mutationFrequency);
 		  
 		  lbl = new JLabel("Mutation ratio:");
 		  g.setConstraints(lbl,  lc);
 		  grid.add(lbl);
-		  final JTextField mutationRatio = new JTextField("0.2");
+		  final JTextField mutationRatio = new JTextField("0.15");
 		  g.setConstraints(mutationRatio, rc);
 		  grid.add(mutationRatio);
 		  
 		  lbl = new JLabel("Pheromone Evaporation Factor:");
 		  g.setConstraints(lbl,  lc);
 		  grid.add(lbl);
-		  final JTextField pheromoneEvaporationFactor = new JTextField("0.2");
+		  final JTextField pheromoneEvaporationFactor = new JTextField("0.1");
 		  g.setConstraints(pheromoneEvaporationFactor, rc);
 		  grid.add(pheromoneEvaporationFactor);
 		  
 		  lbl = new JLabel("Pheromone Regulation Factor:");
 		  g.setConstraints(lbl,  lc);
 		  grid.add(lbl);
-		  final JTextField pheromoneRegulationFactor = new JTextField("0.2");
+		  final JTextField pheromoneRegulationFactor = new JTextField("1");
 		  g.setConstraints(pheromoneRegulationFactor, rc);
 		  grid.add(pheromoneRegulationFactor);
 		  
 		  lbl = new JLabel("Visibility Regulation Factor:");
 		  g.setConstraints(lbl,  lc);
 		  grid.add(lbl);
-		  final JTextField visibilityRegulationFactor = new JTextField("0.2");
+		  final JTextField visibilityRegulationFactor = new JTextField("1.25");
 		  g.setConstraints(visibilityRegulationFactor, rc);
 		  grid.add(visibilityRegulationFactor);
 		  

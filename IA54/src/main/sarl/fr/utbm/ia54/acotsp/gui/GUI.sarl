@@ -13,6 +13,7 @@ import io.sarl.lang.core.EventListener
 import io.sarl.lang.core.Event
 import fr.utbm.ia54.acotsp.IterationFinished
 import fr.utbm.ia54.acotsp.OptimizationFinished
+import fr.utbm.ia54.acotsp.GuiRepaint
 
 class GUI extends GuiPanel
 implements EventListener {
@@ -48,8 +49,8 @@ implements EventListener {
 		this.panel.repaint()
 	}
 	
-	@Override
-	def runOptimization() {
+
+	override runOptimization() {
 		
 		System.out.println("runOptimization sarl")
 		
@@ -61,22 +62,14 @@ implements EventListener {
 		^space = defaultSARLContext.defaultSpace as OpenEventSpace
 		// Registering to receive GUIRepaint events
 		
-		
-		
-		
 		//TODO fix
-		^space.register(this)
-		
-		
-		
-		
+		^space.register(this)	
 		
 		// Sending start to Environment
 		^space.emit(id, new NewOptimization(this.acoParameters))
 	}
 
-	@Override
-	def stopOptimization() {
+	override stopOptimization() {
 		this.setStatus("Stopped Optimization")
 		System.out.println("stopOptimization sarl")
 
@@ -98,18 +91,20 @@ implements EventListener {
 	
 	
 	def receiveEvent(^event : Event) {
-		if(^event instanceof IterationFinished){
-			this.setPath(^event.path, ^event.pathLength)
+		if(^event instanceof GuiRepaint){
+			this.setPath(^event.bestPath, ^event.bestPathLength)
 			this.repaint()
 		} else if (^event instanceof OptimizationFinished){
 			this.setPath(^event.bestPath, ^event.bestPathLength)
 			this.repaint()
-			this.setStatus("Optimization finished, best path length is " + ^event.bestPath)
+			this.setStatus("Optimization finished, best path length is " + ^event.bestPath)	
 		}
 	}
 	
 	def getID : UUID {
-		throw new UnsupportedOperationException("TODO: auto-generated method stub")
+		return this.id
 	}
+	
+
 	
 }

@@ -4,6 +4,7 @@ import com.google.common.base.Objects;
 import fr.utbm.ia54.acotsp.ACOAgent;
 import fr.utbm.ia54.acotsp.ACOParameters;
 import fr.utbm.ia54.acotsp.AgentIsReady;
+import fr.utbm.ia54.acotsp.GuiRepaint;
 import fr.utbm.ia54.acotsp.IterationFinished;
 import fr.utbm.ia54.acotsp.NewIteration;
 import fr.utbm.ia54.acotsp.NewOptimization;
@@ -147,6 +148,9 @@ public class ACOManager extends Agent {
             String _string_1 = this.currentBestPath.toString();
             _$CAPACITY_USE$IO_SARL_CORE_LOGGING$CALLER_1.info((((("Fin d\'optimisation  " + "meilleur chemin : ") + this.currentBestPathLength) + " parcours") + _string_1));
           } else {
+            DefaultContextInteractions _$CAPACITY_USE$IO_SARL_CORE_DEFAULTCONTEXTINTERACTIONS$CALLER_1 = this.$CAPACITY_USE$IO_SARL_CORE_DEFAULTCONTEXTINTERACTIONS$CALLER();
+            GuiRepaint _guiRepaint = new GuiRepaint(this.pheromones, this.currentBestPath, this.currentBestPathLength);
+            _$CAPACITY_USE$IO_SARL_CORE_DEFAULTCONTEXTINTERACTIONS$CALLER_1.emit(_guiRepaint);
             this.launchIteration();
           }
         }

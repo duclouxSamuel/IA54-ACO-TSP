@@ -1,7 +1,7 @@
 package fr.utbm.ia54.acotsp.gui;
 
 import fr.utbm.ia54.acotsp.ACOParameters;
-import fr.utbm.ia54.acotsp.IterationFinished;
+import fr.utbm.ia54.acotsp.GuiRepaint;
 import fr.utbm.ia54.acotsp.NewOptimization;
 import fr.utbm.ia54.acotsp.OptimizationFinished;
 import fr.utbm.ia54.acotsp.gui.GuiPanel;
@@ -84,8 +84,8 @@ public class GUI extends GuiPanel implements EventListener {
   }
   
   public void receiveEvent(final Event event) {
-    if ((event instanceof IterationFinished)) {
-      this.setPath(((IterationFinished)event).path, ((IterationFinished)event).pathLength);
+    if ((event instanceof GuiRepaint)) {
+      this.setPath(((GuiRepaint)event).bestPath, ((GuiRepaint)event).bestPathLength);
       this.repaint();
     } else {
       if ((event instanceof OptimizationFinished)) {
@@ -98,7 +98,7 @@ public class GUI extends GuiPanel implements EventListener {
   
   @Pure
   public UUID getID() {
-    throw new UnsupportedOperationException("TODO: auto-generated method stub");
+    return GUI.id;
   }
   
   @Override
