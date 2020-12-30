@@ -1,6 +1,11 @@
 package fr.utbm.ia54.acotsp
 
-import gui.GUI
+import io.sarl.bootstrap.SRE
+import io.sarl.bootstrap.SREBootstrap
+import java.util.UUID
+import io.sarl.core.OpenEventSpace
+import io.sarl.lang.core.AgentContext
+import fr.utbm.ia54.acotsp.gui.GUI
 
 class Launcher{
 	
@@ -10,6 +15,24 @@ class Launcher{
 		
 		gui.setVisible(true)
 		
+		var kernel : SREBootstrap = SRE::getBootstrap
+		var environment : UUID = UUID::randomUUID
+	
+	
+		//Test register outside of GUI class
+		/*
+		var defaultSARLContext : AgentContext = kernel.startWithoutAgent
+		
+		var ^space : OpenEventSpace = defaultSARLContext.defaultSpace as OpenEventSpace
+		^space.register(gui)
+		*/
+		
+		kernel.startAgentWithID(typeof(ACOManager), environment)
+		
+		
+		
 	}
+	
+	
 	
 }

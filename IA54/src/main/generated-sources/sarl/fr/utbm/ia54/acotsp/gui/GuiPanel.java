@@ -17,9 +17,16 @@ import java.awt.event.MouseWheelEvent;
 import java.awt.event.MouseWheelListener;
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
+
 import javax.swing.*;
 
+import fr.utbm.ia54.acotsp.ACOParameters;
 import fr.utbm.ia54.acotsp.Gtsp;
+import fr.utbm.ia54.acotsp.NewOptimization;
+import fr.utbm.ia54.acotsp.OptimizationFinished;
+import io.sarl.core.DefaultContextInteractions;
+import io.sarl.lang.core.Agent;
 
 
 public class GuiPanel extends JFrame
@@ -34,10 +41,12 @@ public class GuiPanel extends JFrame
 	private JDialog runopt; // Run optimization dialog box
 	private JFileChooser chooser; // file chooser
 	private JTextField status = null; // Status Text Bar
-	private ACOPanel panel;
+	public	ACOPanel panel;
 	private JScrollPane  scroll  = null;  /* scroll pane viewport */
 	private JDialog      params  = null;  /* parameter dialog box */
-
+	private float bestPathLength;
+	
+	private ACOParameters acoParameters;
 	
     private int          mx, my;          /* mouse coordinates */
     private int          mode    = 0;     /* mouse operation mode */
@@ -78,7 +87,7 @@ public class GuiPanel extends JFrame
 	
 	  private JFileChooser createChooser ()
 	  {                             /* --- create a file chooser */
-	    JFileChooser fc = new JFileChooser();
+	    JFileChooser fc = new JFileChooser("data/instances");
 	    fc.setFileSelectionMode(JFileChooser.FILES_ONLY);
 	    fc.setFileHidingEnabled(true);
 	    fc.setAcceptAllFileFilterUsed(true);
@@ -148,10 +157,10 @@ public class GuiPanel extends JFrame
 		  lbl = new JLabel("Number of ants:");
 		  g.setConstraints(lbl,  lc);
 		  grid.add(lbl);
-		  final JSpinner nunberOfAnts = new JSpinner(
+		  final JSpinner numberOfAnts = new JSpinner(
 				  new SpinnerNumberModel(30, 1, 999999, 1));
-		  g.setConstraints(nunberOfAnts, rc);
-		  grid.add(nunberOfAnts);
+		  g.setConstraints(numberOfAnts, rc);
+		  grid.add(numberOfAnts);
 		  
 		  lbl = new JLabel("Mutation frequency:");
 		  g.setConstraints(lbl,  lc);
@@ -195,18 +204,53 @@ public class GuiPanel extends JFrame
 		    btn.addActionListener(new ActionListener () {
 		      public void actionPerformed (ActionEvent e) {
 		        dlg.setVisible(false);
-		        applyParameters();
+		        
+		    	float pheromoneEvaporation = Float.parseFloat(pheromoneEvaporationFactor.getText());
+		    	float pheromoneRegulation = Float.parseFloat(pheromoneRegulationFactor.getText());
+		    	float visibilityRegulation = Float.parseFloat(visibilityRegulationFactor.getText());
+		    	float probabilityOfMutation = Float.parseFloat(mutationRatio.getText());
+		    	int frequencyOfMutation = (int) mutationFrequency.getValue();
+		    	int ants = (int) numberOfAnts.getValue();
+		    	int iterations = (int) numberOfIterations.getValue();
+		    	
+		    	
+		        applyParameters(pheromoneEvaporation,
+		        		pheromoneRegulation,
+		        		visibilityRegulation,
+        				ants,
+        				iterations,
+        				frequencyOfMutation,
+        				probabilityOfMutation);
+		        
+		        
 		        runOptimization();
 		        
-//		        ACODemo.this.runAnts(((Integer)epochs.getValue()).intValue(),
-//		                             ((Integer)delay.getValue()).intValue());
 		      } } );
 
 		  
 		  btn = new JButton("Apply"); bbar.add(btn);
 		  btn.addActionListener(new ActionListener () {
 		    public void actionPerformed (ActionEvent e) {
-		    	applyParameters();
+		    	
+		    	float pheromoneEvaporation = Float.parseFloat(pheromoneEvaporationFactor.getText());
+		    	float pheromoneRegulation = Float.parseFloat(pheromoneRegulationFactor.getText());
+		    	float visibilityRegulation = Float.parseFloat(visibilityRegulationFactor.getText());
+		    	float probabilityOfMutation = Float.parseFloat(mutationRatio.getText());
+		    	
+		    	
+		    	
+		    	int frequencyOfMutation = (int) mutationFrequency.getValue();
+		    	int ants = (int) numberOfAnts.getValue();
+		    	int iterations = (int) numberOfIterations.getValue();
+		    	
+		    	
+		        applyParameters(pheromoneEvaporation,
+		        		pheromoneRegulation,
+		        		visibilityRegulation,
+        				ants,
+        				iterations,
+        				frequencyOfMutation,
+        				probabilityOfMutation);
 		    } } );
 		  btn = new JButton("Close"); bbar.add(btn);
 		  btn.addActionListener(new ActionListener () {
@@ -266,23 +310,56 @@ public class GuiPanel extends JFrame
 	    item.setMnemonic('s');
 	    item.addActionListener(new ActionListener() {
 	      public void actionPerformed (ActionEvent e) {
-	        status.setText("Stopped the optimization");
+	    	  stopOptimization();
+
 	        //TODO Stop optimization
 	      } } );
 	    
 		return mbar;
 			}
 	
-	//TODO code
-	public void applyParameters() {
-		//Update Shared Data class
+	//Conversion des float et int en Float et Integer, et création de l'instance ACOParameters
+	public ACOParameters applyParameters(float pheromoneEvaporationFactor,
+								float pheromoneRegulationFactor,
+								float visibilityRegulationFactor,
+								int numberOfAnts,
+								int numberOfIterations,
+								int frequencyOfMutation,
+								float probabilityOfMutation) {
+		
+		ArrayList<ArrayList<Float>> distances = convertToFloatArrayList(gtsp.getNode_dist());
+		ArrayList<ArrayList<Float>> positions = convertToFloatArrayList(gtsp.getNode_coord_section());
+		ArrayList<Integer> clusters = convertToIntegerArrayList(gtsp.getGroup_list());
+		
+		ACOParameters params = new ACOParameters(
+				(Integer) gtsp.getDimension(),
+				(Integer) gtsp.getGroupDimension(),
+				distances,
+				positions,
+				clusters,
+				(Float) pheromoneEvaporationFactor,
+				(Float) pheromoneRegulationFactor,
+				(Float) visibilityRegulationFactor,
+				(Integer) numberOfAnts,
+				(Integer) numberOfIterations,
+				(Integer) frequencyOfMutation,
+				(Float) probabilityOfMutation);
+		this.acoParameters = params;
+		return params;
 	}
 	
 	/*--------------------------------------------------------------------*/
 
-	//TODO code
+
 	public void runOptimization() {
-		//Emit new optimization event
+	      //DefaultContextInteractions _$CAPACITY_USE$IO_SARL_CORE_DEFAULTCONTEXTINTERACTIONS$CALLER = Agent.$CAPACITY_USE$IO_SARL_CORE_DEFAULTCONTEXTINTERACTIONS$CALLER();
+	      //NewOptimization _newOptimization = new NewOptimization(acoParameters);
+	      //_$CAPACITY_USE$IO_SARL_CORE_DEFAULTCONTEXTINTERACTIONS$CALLER.emit(_newOptimization);
+	    	}
+	
+	//TODO code
+	public void stopOptimization() {
+		status.setText("Stop");
 	}
 	
 	
@@ -391,5 +468,47 @@ public class GuiPanel extends JFrame
 	        break;                /* adapt position to viewport */
 	    }                           /* (set the mouse operation mode) */
 	  }  /* mousePressed() */
-			  
+
+	  public ArrayList<ArrayList<Float>> convertToFloatArrayList(final float[][] array) {
+		    ArrayList<ArrayList<Float>> response = new ArrayList<ArrayList<Float>>();
+		    for (int i = 0; (i < array.length); i++) {
+		      {
+		        ArrayList<Float> temp = new ArrayList<Float>();
+		        for (int j = 0; (j < array[i].length); j++) {
+		          temp.add(Float.valueOf(array[i][j]));
+		        }
+		        response.add(temp);
+		      }
+		    }
+		    return response;
+		  }
+		  
+	  public ArrayList<Integer> convertToIntegerArrayList(final int[] array) {
+		    ArrayList<Integer> response = new ArrayList<Integer>();
+		    for (int i = 0; (i < array.length); i++) {
+		      response.add(Integer.valueOf(array[i]));
+		    }
+		    return response;
+		  }
+	
+	  public void setStatus(String s) {
+		  status.setText(s);
+	  }
+	  
+	  public ACOParameters getAcoParameters() {
+		  return acoParameters;
+	  }
+	  
+	  public void setAcoParameters(ACOParameters params) {
+		  this.acoParameters = params;
+	  }
+	  
+	  public void setPath(ArrayList<Integer> path, Float pathLength ) {
+		  panel.setBestTour(path);
+		  this.bestPathLength = pathLength;
+	  }
+	
+	
 }
+
+

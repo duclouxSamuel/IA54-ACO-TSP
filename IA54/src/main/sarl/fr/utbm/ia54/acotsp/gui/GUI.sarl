@@ -1,4 +1,4 @@
-package gui
+package fr.utbm.ia54.acotsp.gui
 
 import fr.utbm.ia54.acotsp.gui.GuiPanel
 import java.util.ArrayList
@@ -7,13 +7,22 @@ import io.sarl.bootstrap.SRE
 import io.sarl.lang.core.AgentContext
 import java.util.UUID
 import io.sarl.lang.core.EventSpace
+import io.sarl.core.OpenEventSpace
+import fr.utbm.ia54.acotsp.NewOptimization
+import io.sarl.lang.core.EventListener
+import io.sarl.lang.core.Event
+import fr.utbm.ia54.acotsp.IterationFinished
+import fr.utbm.ia54.acotsp.OptimizationFinished
 
-class GUI extends GuiPanel {
+class GUI extends GuiPanel
+implements EventListener {
 
+	public static val id = UUID::randomUUID
 			/** 
 		 * SRE Kernel instance
 		 */
 	var kernel : SREBootstrap
+	
 
 	/** 
 	 * The default SARL context where environment and boids are spawned
@@ -24,6 +33,13 @@ class GUI extends GuiPanel {
 	 * Identifier of the environment
 	 */
 	var environment : UUID
+
+	/** 
+	 * the vent space used to establish communication between GUI and agents,
+	 * Especially enabling GUI to forward start event to the environment, 
+	 * respectively the environment to send GUIRepain at each simulation step to the GUI
+	 */
+	var ^space : OpenEventSpace
 	
 	def repaint(pheromones : ArrayList<ArrayList<Float>>, bestPath : ArrayList<Integer> , bestPathLength : Float ){
 		this.panel.setBestTour(bestPath)
@@ -34,11 +50,66 @@ class GUI extends GuiPanel {
 	
 	@Override
 	def runOptimization() {
-
-	//TODO Emit NewOptimization() event		
 		
+		System.out.println("runOptimization sarl")
+		
+		kernel = SRE::getBootstrap
+		
+		defaultSARLContext = kernel.startWithoutAgent
+		
+		environment = UUID::randomUUID
+		^space = defaultSARLContext.defaultSpace as OpenEventSpace
+		// Registering to receive GUIRepaint events
+		
+		
+		
+		
+		//TODO fix
+		^space.register(this)
+		
+		
+		
+		
+		
+		// Sending start to Environment
+		^space.emit(id, new NewOptimization(this.acoParameters))
 	}
 
-	
+	@Override
+	def stopOptimization() {
+		this.setStatus("Stopped Optimization")
+		System.out.println("stopOptimization sarl")
 
+		kernel = SRE::getBootstrap
+		
+
+		defaultSARLContext = kernel.startWithoutAgent
+
+		environment = UUID::randomUUID
+		^space = defaultSARLContext.defaultSpace as OpenEventSpace
+
+		// Registering to receive GUIRepaint events
+		//^space.register(this)
+		
+		//TODO complete
+		^space.emit(id, new OptimizationFinished(null ,null, null )) //TODO fill in the parameters
+		
+	}
+	
+	
+	def receiveEvent(^event : Event) {
+		if(^event instanceof IterationFinished){
+			this.setPath(^event.path, ^event.pathLength)
+			this.repaint()
+		} else if (^event instanceof OptimizationFinished){
+			this.setPath(^event.bestPath, ^event.bestPathLength)
+			this.repaint()
+			this.setStatus("Optimization finished, best path length is " + ^event.bestPath)
+		}
+	}
+	
+	def getID : UUID {
+		throw new UnsupportedOperationException("TODO: auto-generated method stub")
+	}
+	
 }

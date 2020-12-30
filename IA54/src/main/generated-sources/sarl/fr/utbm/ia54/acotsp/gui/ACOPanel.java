@@ -13,6 +13,7 @@ import java.util.Arrays;
 import javax.swing.JPanel;
 
 import fr.utbm.ia54.acotsp.Gtsp;
+import java.util.ArrayList;
 
 
 
@@ -58,6 +59,7 @@ public class ACOPanel extends JPanel {
 	private Color[] groupColors; //Colors for groups
 	private Stroke    thick;      /* stroke for trail drawing */
 	private Stroke    thin;       /* stroke for tour drawing */	
+	private float[][] pheromoneTrail; /* pheromoneTrail*/
 	
 	
 public ACOPanel() {
@@ -218,9 +220,36 @@ public void paint (Graphics g)
 		  int city2 = bestTour[cityIndex+1];
 		  g.drawLine(this.xs[city1], this.ys[city1], this.xs[city2], this.ys[city2] );
 	  }
-
   }
 
 }  /* paint() */
+
+public void setBestTour(ArrayList<Integer> integers) {
+	int size = integers.size();
+	int[] tour =  new int[size];
+	
+	for (int i = 0 ; i<size ; i++) {
+		tour[i] = integers.get(i);
+	}
+	bestTour = tour;
+}
+
+public void setPheromones(ArrayList<ArrayList<Float>> lists) {
+	
+	int size = lists.size();
+	float[][] pheromones = new float[size][size];
+	
+	for(int i = 0 ; i<size ; i++) {
+		int size2 = lists.get(i).size();
+		
+		float[] row = new float[size2];
+		for(int j = 0 ; j<size ; j++) {
+			row[j] = lists.get(i).get(j).floatValue();
+		}
+		pheromones[i] = row;
+	}
+	pheromoneTrail = pheromones;
+	
+}
 
 }
