@@ -97,7 +97,7 @@ implements EventListener {
 		} else if (^event instanceof OptimizationFinished){
 			this.setPath(^event.bestPath, ^event.bestPathLength)
 			this.repaint()
-			this.setStatus("Optimization finished, best path length is " + ^event.bestPath)	
+			this.setStatus("Optimization finished, best path length is " + ^event.bestPath + ' and length : ' +^event.bestPathLength)	
 		}
 	}
 	

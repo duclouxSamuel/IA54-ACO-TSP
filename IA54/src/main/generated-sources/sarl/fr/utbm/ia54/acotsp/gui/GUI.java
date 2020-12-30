@@ -91,7 +91,7 @@ public class GUI extends GuiPanel implements EventListener {
       if ((event instanceof OptimizationFinished)) {
         this.setPath(((OptimizationFinished)event).bestPath, ((OptimizationFinished)event).bestPathLength);
         this.repaint();
-        this.setStatus(("Optimization finished, best path length is " + ((OptimizationFinished)event).bestPath));
+        this.setStatus(((("Optimization finished, best path length is " + ((OptimizationFinished)event).bestPath) + " and length : ") + ((OptimizationFinished)event).bestPathLength));
       }
     }
   }
