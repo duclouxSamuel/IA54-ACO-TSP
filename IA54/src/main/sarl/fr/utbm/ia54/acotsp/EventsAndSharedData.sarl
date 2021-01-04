@@ -53,15 +53,17 @@ event GuiRepaint {
 	var pheromones : ArrayList<ArrayList<Float>>
 	var bestPath : ArrayList<Integer>
 	var bestPathLength : Float
+	var numberOfIterationsDone : Integer
 
-	new(p : ArrayList<ArrayList<Float>>, bstPath : ArrayList<Integer>, bstPathLength : Float) {
+	new(p : ArrayList<ArrayList<Float>>, bstPath : ArrayList<Integer>, bstPathLength : Float, iterations : Integer) {
 		pheromones = p
 		bestPath = bstPath
 		bestPathLength = bstPathLength
+		numberOfIterationsDone = iterations
 	}
 }
 
-event AgentIsReady
+event AgentIsReady{}
 
 class ACOParameters {
 

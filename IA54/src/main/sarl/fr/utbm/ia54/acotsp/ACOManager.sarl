@@ -107,7 +107,7 @@ agent ACOManager {
 						info("Fin d'optimisation  " + "meilleur chemin : " + currentBestPathLength + ' parcours' +
 							currentBestPath.toString)
 					} else {
-						emit(new GuiRepaint(pheromones, currentBestPath, currentBestPathLength))
+						emit(new GuiRepaint(pheromones, currentBestPath, currentBestPathLength, numberOfIterationsDone))
 						launchIteration()
 					}
 				}

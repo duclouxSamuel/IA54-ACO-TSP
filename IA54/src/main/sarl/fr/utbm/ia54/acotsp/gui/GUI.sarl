@@ -89,6 +89,8 @@ implements EventListener {
 		if(^event instanceof GuiRepaint){
 			this.setPath(^event.bestPath, ^event.bestPathLength)
 			this.panel.setPheromones(^event.pheromones)
+			this.setStatus("Iteration n°" + ^event.numberOfIterationsDone + ", current best path length for "+this.gtsp.getName+" is : " +
+				^event.bestPathLength)
 			this.repaint()
 		} else if (^event instanceof OptimizationFinished){
 			this.setPath(^event.bestPath, ^event.bestPathLength)
