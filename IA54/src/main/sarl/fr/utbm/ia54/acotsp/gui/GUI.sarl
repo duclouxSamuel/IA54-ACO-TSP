@@ -60,9 +60,8 @@ implements EventListener {
 		
 		environment = UUID::randomUUID
 		^space = defaultSARLContext.defaultSpace as OpenEventSpace
-		// Registering to receive GUIRepaint events
 		
-		//TODO fix
+		// Registering to receive GUIRepaint events
 		^space.register(this)	
 		
 		// Sending start to Environment
@@ -80,11 +79,7 @@ implements EventListener {
 
 		environment = UUID::randomUUID
 		^space = defaultSARLContext.defaultSpace as OpenEventSpace
-
-		// Registering to receive GUIRepaint events
-		//^space.register(this)
 		
-		//TODO complete
 		^space.emit(id, new OptimizationFinished(null ,null, null )) //TODO fill in the parameters
 		
 	}
@@ -93,12 +88,15 @@ implements EventListener {
 	def receiveEvent(^event : Event) {
 		if(^event instanceof GuiRepaint){
 			this.setPath(^event.bestPath, ^event.bestPathLength)
+			this.panel.setPheromones(^event.pheromones)
 			this.repaint()
 		} else if (^event instanceof OptimizationFinished){
 			this.setPath(^event.bestPath, ^event.bestPathLength)
+			this.panel.setPheromones(^event.pheromones)
 			this.repaint()
-			this.setStatus("Optimization finished, best path length is " + ^event.bestPath + ' and length : ' +^event.bestPathLength)	
-		}
+			this.setStatus(
+				"Optimization finished, best path length for " + this.gtsp.getName + " is " + ^event.bestPathLength)	
+				}
 	}
 	
 	def getID : UUID {

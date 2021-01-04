@@ -507,6 +507,10 @@ public class GuiPanel extends JFrame
 		  panel.setBestTour(path);
 		  this.bestPathLength = pathLength;
 	  }
+	  
+	  public Gtsp getGtsp() {
+		  return gtsp;
+	  }
 	
 	
 }

@@ -60,6 +60,7 @@ public class ACOPanel extends JPanel {
 	private Stroke    thick;      /* stroke for trail drawing */
 	private Stroke    thin;       /* stroke for tour drawing */	
 	private float[][] pheromoneTrail; /* pheromoneTrail*/
+	private float max, avg;  /* max and avg trail for graphic purpose*/
 	
 	
 public ACOPanel() {
@@ -78,7 +79,7 @@ public ACOPanel() {
 		this.trailColors = new Color[256];
 		for (int i = 256; --i >=0;)
 			this.trailColors[255-i] = new Color(i/255.0F, i/255.0F, i/255.0F);
-	    this.thick = new BasicStroke(7.0F);
+	    this.thick = new BasicStroke(5.0F);
 	    this.thin  = new BasicStroke(2.0F);
 	}
 
@@ -157,36 +158,29 @@ public void paint (Graphics g)
   
 //TODO Afficher la carte des phéromones avec des traits gris d'intensité variable
   /* --- draw the trail --- */
-//  if (this.antc != null) {    /* if there is an ant colony */
-//    avg = this.antc.getTrailAvg();
-//    max = this.antc.getTrailMax();
-//    if (max < 2*avg) max = 2*avg;
-//    max = 255.0/max;          /* compute color scaling factor */
-//    for (k = 0, i = n; --i >= 0; ) {
-//      for (j = i; --j >= 0; ) {
-//        e   = this.edges[k++];/* traverse the edges */
-//        trl = this.antc.getTrail(e.i = i, e.j = j);
-//        e.c = (int)(max*trl); /* compute the color index */
-//        if (e.c > 255) e.c = 255;
-//      }                       /* bound the color index */
-//    }                         /* (for programming safety) */
-//    Arrays.sort(this.edges, 0, k);
-//    ((Graphics2D)g).setStroke(this.thick);
-//    for (i = 0; i < k; i++) { /* traverse the edges */
-//      e = this.edges[i];      /* get edge and set color */
-//      g.setColor(this.cols[e.c]);
-//      g.drawLine(this.xs[e.i],this.ys[e.i],this.xs[e.j],this.ys[e.j]);
-//    }                         /* draw a line between the vertices */
-//    ((Graphics2D)g).setStroke(this.thin);
-//    g.setColor(Color.red);    /* draw the best tour in red */
-//    tour = this.antc.getBestTour();
-//    i    = tour[0];           /* get the tour and its start */
-//    for (k = n; --k >= 0; ) { /* traverse the edges of the tour */
-//      j = i; i = tour[k];     /* get the next vertex index */
-//      g.drawLine(this.xs[i], this.ys[i], this.xs[j], this.ys[j]);
-//    }                         /* draw the next edge of the tour */
-//  }                           /* (first edge closes tour) */
-
+  
+if(pheromoneTrail == null) {
+}else {
+	  avg = this.getTrailAvg();
+	  max = this.getTrailMax();
+	  if (max < 2*avg) max = 2*avg;
+	  max = 255.0/max;          /* compute color scaling factor */
+    for (k = 0, i = n; --i >= 0; ) {
+      for (j = i; --j >= 0; ) {
+        e   = this.edges[k++];/* traverse the edges */
+        trl = this.getPheromones(e.i = i, e.j = j);
+        e.c = (int)(max*trl); /* compute the color index */
+        if (e.c > 255) e.c = 255;
+      }                       /* bound the color index */
+    }                         /* (for programming safety) */
+    Arrays.sort(this.edges, 0, k);
+    ((Graphics2D)g).setStroke(this.thick);
+    for (i = 0; i < k; i++) { /* traverse the edges */
+      e = this.edges[i];      /* get edge and set color */
+      g.setColor(this.trailColors[e.c]);
+      g.drawLine(this.xs[e.i],this.ys[e.i],this.xs[e.j],this.ys[e.j]);
+    }                         /* draw a line between the vertices */
+}
   /* --- draw the vertices --- */
   for (i = n; --i >= 0; ) {   /* traverse the vertices */
     x = this.xs[i]; y = this.ys[i];
@@ -200,13 +194,6 @@ public void paint (Graphics g)
     g.fillOval(x-3, y-3, 7, 7);
   }                           /* draw a circle */
   
-//TODO relier bestTour au sarl
-  
-  // Test pour affichage du bestTour sur le graph
-//  bestTour = new int[3];
-//  bestTour[0] = 7-1;
-//  bestTour[1] = 8-1;
-//  bestTour[2] = 5-1;
   
   /* draw best tour */
   if (bestTour == null) {
@@ -224,6 +211,14 @@ public void paint (Graphics g)
 
 }  /* paint() */
 
+private double getTrailMax() {
+	return max;
+}
+
+private double getTrailAvg() {
+	return avg;
+}
+
 public void setBestTour(ArrayList<Integer> integers) {
 	int size = integers.size();
 	int[] tour =  new int[size];
@@ -235,21 +230,36 @@ public void setBestTour(ArrayList<Integer> integers) {
 }
 
 public void setPheromones(ArrayList<ArrayList<Float>> lists) {
-	
 	int size = lists.size();
 	float[][] pheromones = new float[size][size];
+	
+	float maximum = 0;
+	float average = 0;
 	
 	for(int i = 0 ; i<size ; i++) {
 		int size2 = lists.get(i).size();
 		
 		float[] row = new float[size2];
 		for(int j = 0 ; j<size ; j++) {
-			row[j] = lists.get(i).get(j).floatValue();
+			float value = lists.get(i).get(j).floatValue();
+			row[j] = value;
+			
+			if (value>maximum)
+				maximum = value;
+			average += value;
+			
 		}
 		pheromones[i] = row;
 	}
-	pheromoneTrail = pheromones;
 	
+	max = maximum;
+	avg = average/(size*size);
+	pheromoneTrail = pheromones;
 }
+	
+public float getPheromones(int i, int j) {
+	return pheromoneTrail[i][j];
+}
+	
 
 }
